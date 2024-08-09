@@ -123,7 +123,7 @@
 									{/if}
 								</div>
 							</div>
-							<p class="flex flex-1">Erstellt von mir</p>
+							<p class="flex flex-1">Erstellt von {post.expand.author.name}</p>
 							<div class="flex justify-end">
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
@@ -145,9 +145,9 @@
 											</DropdownMenu.Item>
 
 											<DropdownMenu.Separator />
-											<!-- <DropdownMenu.CheckboxItem bind:checked={published}>
+											<DropdownMenu.CheckboxItem bind:checked={published}>
 												Öffentlich
-											</DropdownMenu.CheckboxItem> -->
+											</DropdownMenu.CheckboxItem>
 										</DropdownMenu.Group>
 									</DropdownMenu.Content>
 								</DropdownMenu.Root>
