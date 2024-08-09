@@ -4,13 +4,12 @@ import { redirect } from '@sveltejs/kit';
 export const load = (async ({ locals }) => {
 	let correspondingDepartment;
 
-	if (
-		locals.pb.authStore.baseModel.role == 'DEPARTMENT_LEADER' ||
-		locals.pb.authStore.baseModel.role == 'ADMIN'
-	) {
-		correspondingDepartment = await locals.pb.collection('departments').getList(1, 1, {
-			filter: locals.pb.filter('leader = {:id}', { id: locals.pb.authStore.baseModel.id })
-		});
+	if (locals.pb.authStore.baseModel.role == 'DEPARTMENT_LEADER') {
+		correspondingDepartment = await locals.pb
+			.collection('departments')
+			.getFirstListItem(
+				locals.pb.filter('leader = {:id}', { id: locals.pb.authStore.baseModel.id })
+			);
 
 		throw redirect(303, '/dashboard/departments/' + correspondingDepartment.items[0].id);
 	}

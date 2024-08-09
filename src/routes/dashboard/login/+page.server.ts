@@ -44,18 +44,25 @@
 // 	}
 // };
 
-// import type { PageServerLoad } from './$types';
+import type { PageServerLoad } from './$types';
 
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.pb.authStore.model) {
+		throw redirect(303, '/dashboard');
+	}
+};
 
 export const actions = {
 	login: async ({ request, locals }) => {
 		const formData = await request.formData();
-		const email = formData.get('email');
-		const password = formData.get('password');
+		const email = formData.get('email') as string;
+		const password = formData.get('password') as string;
 
 		try {
-			const { token, user } = await locals.pb.collection('users').authWithPassword(email, password);
+			await locals.pb.collection('users').authWithPassword(email, password);
+			return redirect(303, '/dashboard');
 		} catch (error) {
 			console.log('Error:', error);
 			return {
@@ -63,8 +70,6 @@ export const actions = {
 				email: email
 			};
 		}
-
-		throw redirect(303, '/dashboard');
 	},
 	logout: async ({ locals }) => {
 		locals.pb.authStore.clear();

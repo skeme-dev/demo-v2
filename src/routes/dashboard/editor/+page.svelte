@@ -19,7 +19,7 @@
 	import * as Alert from '$lib/components/dashboard/ui/alert/index';
 	import { getImageSizes } from '$lib/utils/image';
 	import Head from '$lib/components/dashboard/components/editor/Head.svelte';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
 
@@ -185,6 +185,8 @@
 	onMount(async () => {
 		sizes = await getImageSizes(previewImageURL);
 		correctAspect = sizes.w > sizes.h;
+
+		await invalidateAll();
 	});
 
 	$: if (imageFiles) {
@@ -206,6 +208,9 @@
 		const editorContent = editor.getJSON();
 		const id = data.record.id;
 
+		const title = titleInput.value;
+		const imageUrl = imageUrlInput.value;
+
 		// POST request to save
 		fetch('/dashboard/editor/save', {
 			method: 'POST',
@@ -214,8 +219,8 @@
 			const responseData = await res.json();
 			if (responseData.success) {
 				alert('Die Änderung wurden gespeichert');
-				toast.success('Die Änderungen wurden gespeichert');
 				await invalidateAll();
+				toast.success('Die Änderungen wurden gespeichert');
 			} else if (responseData.error) {
 				console.error('Fehler ist aufgetreten');
 				toast.error('Ein Fehler ist aufgetreten');
@@ -241,19 +246,17 @@
 			method: 'POST',
 			body: JSON.stringify(data)
 		}).then((response) => {
-			response.json().then((data) => {
-				console.log(data);
-				// goto('/blog/preview/' + );
+			response.json().then(async (res) => {
+				if (res.code == 200) {
+					goto('/dashboard/editor?pid=' + res.data.id);
+					// await invalidateAll();
+				}
 			});
 		});
 	}
 
-	let title = data.record && data.record.title;
-	let imageUrl = data.record && data.record.imageUrl;
-
-	$: if (title) {
-		console.log(title);
-	}
+	let titleInput;
+	let imageUrlInput;
 </script>
 
 <div class="flex flex-col">
@@ -322,12 +325,17 @@
 					<div class="w-full flex space-x-6 mt-6">
 						<div class="w-1/2 flex flex-col">
 							<h1 class="text-gray-600 text-sm font-semibold">Titel</h1>
-							<input bind:value={title} class="w-full flex border-2 mt-3 rounded-lg bg-white p-3" />
+							<input
+								bind:this={titleInput}
+								value={data.record.title}
+								class="w-full flex border-2 mt-3 rounded-lg bg-white p-3"
+							/>
 						</div>
 						<div class="w-1/2 flex flex-col">
 							<h1 class="text-gray-600 text-sm font-semibold">Bild</h1>
 							<div class="flex space-x-3 items-center mt-3">
 								<input
+									bind:this={imageUrlInput}
 									value={data.record.imageUrl}
 									class="w-full flex border-2 rounded-lg bg-white p-3"
 								/>

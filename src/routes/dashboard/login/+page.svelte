@@ -1,20 +1,30 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import CircleAlert from 'lucide-svelte/icons/circle-alert';
 	import { goto } from '$app/navigation';
-	import Alert from '$lib/components/dashboard/ui/alert/alert.svelte';
+	import * as Alert from '$lib/components/dashboard/ui/alert/index';
 	import { Button } from '$lib/components/dashboard/ui/button';
 	import { Input } from '$lib/components/dashboard/ui/input';
 	import { Label } from '$lib/components/dashboard/ui/label';
 	import type { PageData } from './$types';
+	import { fade, slide } from 'svelte/transition';
+	import { splitBlockKeepMarks } from '@tiptap/pm/commands';
 
 	export let form;
+
+	console.log(form);
 </script>
+
+<svelte:head>
+	<title>Login | SV Koweg e.V.</title>
+</svelte:head>
 
 <main class="w-full h-screen flex flex-1 justify-center items-center">
 	<div
-		class="w-1/3 h-fit flex flex-col space-y-12 justify-center items-center mx-12 px-12 rounded-lg"
+		class="w-[40%] h-fit flex flex-col space-y-6 justify-center items-center mx-12 px-12 rounded-lg"
 	>
 		<svg
+			class="mb-6"
 			width="104"
 			height="24"
 			viewBox="0 0 816 189"
@@ -30,37 +40,46 @@
 				fill="#FF5C00"
 			/>
 		</svg>
-		<div class="w-full space-y-3 flex flex-col">
+		<div class="w-full flex flex-col">
 			<!-- <h1 class="text-center text-xl font-semibold">Wilkommen</h1> -->
 			<h2 class="text-center text-lg font-medium">Melde dich mit deinen Anmeldedaten an.</h2>
 		</div>
 		<form class="w-full space-y-6" action="?/login" method="post" use:enhance>
 			<div class="flex flex-col gap-3">
 				{#if form?.error}
-					<div class="text-red-600 font-medium text-center">Deine Anmeldedaten sind ungültig.</div>
+					<div class="w-full" transition:slide>
+						<Alert.Root variant="destructive" class="mb-6">
+							<CircleAlert class="h-4 w-4" />
+							<Alert.Title>Fehler</Alert.Title>
+							<Alert.Description
+								>Die Anmeldedaten sind nicht korrekt oder ungültig.</Alert.Description
+							>
+						</Alert.Root>
+					</div>
 				{/if}
 				<Label for="email" class="text-base">E-Mail-Adresse</Label>
 				<Input
-					class={form?.error && 'border-red-400 placeholder:text-red-600 border-2'}
+					class={form?.error ? 'border-red-400 placeholder:text-red-600 border-2' : ''}
 					name="email"
 					type="email"
 					id="email"
-					value={form?.values.email ?? ''}
+					required
+					value={form?.email ?? ''}
 					placeholder="test@sv-koweg.de"
 				/>
 			</div>
 			<div class="flex flex-col gap-3">
 				<Label for="pw" class="text-base">Passwort</Label>
 				<Input
-					class={form?.error && 'border-red-400 placeholder:text-red-600 border-2'}
+					class={form?.error ? 'border-red-400 placeholder:text-red-600 border-2' : ''}
 					name="password"
 					type="password"
 					id="pw"
+					required
 					placeholder="Passwort eingeben"
 				/>
 			</div>
 			<Button type="submit" class="w-full !mt-10">Anmelden</Button>
 		</form>
 	</div>
-	<div class="w-2/3 h-full bg-accent">te</div>
 </main>

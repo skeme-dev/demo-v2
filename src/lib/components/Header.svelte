@@ -66,6 +66,10 @@
 				{
 					label: 'Downloads',
 					route: '/service/downloads'
+				},
+				{
+					label: 'Dashboard',
+					route: '/dashboard'
 				}
 			]
 		},

@@ -7,14 +7,9 @@
 	import Underline from '@tiptap/extension-underline';
 	import StarterKit from '@tiptap/starter-kit';
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
-
-	console.log(data.record);
-
-	if (data.errorCode) {
-		console.log('Kein Bericht gefunden');
-	}
 
 	const placeholderBlogPosts = [
 		{

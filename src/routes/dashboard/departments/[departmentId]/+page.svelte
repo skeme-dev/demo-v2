@@ -1,18 +1,34 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Button from '$lib/components/dashboard/ui/button/button.svelte';
-	import { Plus } from 'lucide-svelte';
+	import { Pencil, PencilOff, Plus } from 'lucide-svelte';
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
 	import Input from '$lib/components/dashboard/ui/input/input.svelte';
 	import * as Select from '$lib/components/dashboard/ui/select/index';
 	import { enhance } from '$app/forms';
+	import { fade, slide } from 'svelte/transition';
+	import { invalidate, invalidateAll } from '$app/navigation';
 
 	export let data: PageData;
 	console.log(data.department);
 
 	let previewTeamPicture: string;
 	let formElement;
+	let description: string = data.department.description;
+	let titleEdit: boolean = false;
+
+	async function updateDepartment(id: string, label?: string, description?: string) {
+		const request = await fetch('/dashboard/departments/' + id, {
+			method: 'POST',
+			body: JSON.stringify({ label: label, description: description })
+		});
+
+		const data = await request.json();
+		console.log(data);
+		titleEdit = false;
+		await invalidateAll();
+	}
 </script>
 
 <div class="w-full flex flex-col">
@@ -29,38 +45,40 @@
 	<div class="flex flex-col w-full divide-y-2 space-y-12">
 		<div class="flex w-full border-t-2 pt-6">
 			<div class="w-1/3">
-				<h1 class="font-semibold text-lg">Beschreibung</h1>
+				<h1 class="font-medium text-lg">Beschreibung</h1>
 			</div>
 			<div class="w-3/5">
-				<p>
-					{data.department.description}
-				</p>
+				{#if titleEdit}
+					<div class="flex space-x-3" in:slide>
+						<Input bind:value={description} type="text" />
+						<Button
+							on:click={() => {
+								updateDepartment(data.department.id, data.department.label, description);
+							}}>Speichern</Button
+						>
+					</div>
+				{:else}
+					<p class="flex items-center" in:slide>
+						{data.department.description}
+					</p>
+				{/if}
 			</div>
 			<div class="w-1/12 flex justify-end items-center">
-				<Button variant="outline" size="icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="w-4 h-4"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-						/>
-					</svg>
+				<Button on:click={() => (titleEdit = !titleEdit)} variant="outline" size="icon">
+					{#if !titleEdit}
+						<Pencil size={16} />
+					{:else}
+						<PencilOff size={16} />
+					{/if}
 				</Button>
 			</div>
 		</div>
 		<div class="flex w-full border-t-2 pt-6">
 			<div class="w-1/3">
-				<h1 class="font-semibold text-lg">Mannschaften</h1>
+				<h1 class="font-medium text-lg">Mannschaften</h1>
 			</div>
 			<div class="w-3/5 grid grid-cols-2 gap-6">
-				{#each data.department.expand.teams as team}
+				{#each data?.department.expand.teams as team}
 					<div class="flex flex-col space-y-6 rounded-xl border-2 p-6 w-full">
 						<!-- <img class="rounded-lg w-2/3" src={team.teamImageUrl} alt={team.label} /> -->
 						<div class="w-fit bg-black rounded-full p-3 flex justify-center items-center">
@@ -197,20 +215,7 @@
 				</Dialog>
 
 				<Button variant="outline" size="icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="w-4 h-4"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-						/>
-					</svg>
+					<Pencil size={16} />
 				</Button>
 			</div>
 		</div>

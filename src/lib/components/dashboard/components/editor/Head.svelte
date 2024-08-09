@@ -12,6 +12,7 @@
 
 	let title: string, description: string, imageUrl: string;
 	let inputError: boolean = false;
+	let saveDialogOpen: boolean = false;
 </script>
 
 <header class="bg-white w-screen flex justify-between items-center py-6 px-12 border-b-2">
@@ -37,7 +38,9 @@
 		<h1 class="text-xl font-semibold">{editMode ? 'Bericht bearbeiten' : 'Neuer Bericht'}</h1>
 	</div>
 	<div class="">
-		<Badge variant="outline">Bearbeitungsmodus</Badge>
+		{#if editMode}
+			<Badge variant="outline">Bearbeitungsmodus</Badge>
+		{/if}
 	</div>
 	<div class="space-x-3">
 		<Button variant="ghost" on:click={presave}>
@@ -51,7 +54,7 @@
 				Speichern
 			</Button>
 		{:else}
-			<Dialog.Root>
+			<Dialog.Root bind:open={saveDialogOpen}>
 				<Dialog.Trigger>
 					<Button>
 						<i class="text-lg ri-save-line mr-2" />

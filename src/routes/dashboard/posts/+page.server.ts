@@ -3,10 +3,11 @@ export const load = async ({ locals }) => {
 
 	// get posts created by current user
 	const filteredRecords = records.filter((item) => {
-		return item.expand.author.id == locals.id;
+		console.log(item);
+		return item.expand.author.id == locals.pb.authStore.baseModel.id;
 	});
 
-	console.log('aquired data: ', records);
+	console.log('filtered records ', filteredRecords);
 	return {
 		posts: records,
 		filteredPosts: filteredRecords

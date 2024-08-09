@@ -1,12 +1,19 @@
-import { fail, json } from '@sveltejs/kit';
-
+import { json, redirect } from '@sveltejs/kit';
+import slugify from 'slugify';
 import type { RequestHandler } from './$types';
+
 export const POST: RequestHandler = async ({ locals, request, params }) => {
-	const data = await request.json();
+	const req = await request.json();
+
+	const data = {
+		...req,
+		author: locals.pb.authStore.baseModel.id,
+		slug: slugify(req.title)
+	};
 
 	try {
 		const record = await locals.pb.collection('posts').create(data);
-		return json(record);
+		return json({ code: 200, message: 'Ok', data: { id: record.id } });
 	} catch (error) {
 		return json({
 			error: true

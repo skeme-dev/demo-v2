@@ -2,16 +2,29 @@
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
 	import Button from '$lib/components/dashboard/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/dashboard/ui/dropdown-menu';
-	import { Plus } from 'lucide-svelte';
+	import { Eye, EyeOff, Plus } from 'lucide-svelte';
 	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	export let data: PageData;
 
-	let published = true;
+	async function changePublish(postId: string, publish: boolean) {
+		const request = await fetch('/dashboard/posts/publish', {
+			method: 'POST',
+			body: JSON.stringify({ id: postId, publish: publish })
+		});
+
+		const data = await request.json();
+
+		if (data.code == 200) {
+			await invalidateAll();
+		} else if (data.code == 400) {
+			alert('Es ist ein Fehler aufgetreten');
+		}
+	}
 </script>
 
-<div class="w-full h-full flex flex-col space-y-12">
+<div class="w-full h-full flex flex-col">
 	<div class="flex justify-between items-center mb-6">
 		<div class="flex flex-col space-y-3">
 			<h1 class="text-3xl font-semibold">Berichte</h1>
@@ -22,7 +35,7 @@
 			Bericht erstellen
 		</Button>
 	</div>
-	<div class="flex flex-col">
+	<div class="flex flex-col mb-12">
 		<h2 class="font-medium mb-3">Alle Berichte</h2>
 		<div class="grid grid-cols-3 gap-6">
 			{#each data.posts as post}
@@ -39,7 +52,7 @@
 								{/if}
 							</div>
 						</div>
-						<p class="flex flex-1">Erstellt von {post.expand.author.name}</p>
+						<p class="flex flex-1">Erstellt von {post?.expand.author.name}</p>
 						<div class="flex justify-end">
 							<DropdownMenu.Root>
 								<DropdownMenu.Trigger>
@@ -59,11 +72,30 @@
 											<i class="ri-delete-bin-line" />
 											<p class="ml-2">Löschen</p>
 										</DropdownMenu.Item>
-
-										<DropdownMenu.Separator />
-										<DropdownMenu.CheckboxItem bind:checked={published}>
-											Öffentlich
-										</DropdownMenu.CheckboxItem>
+										<DropdownMenu.Sub>
+											<DropdownMenu.SubTrigger>
+												<!-- <Eye size={16} /> -->
+												<span>Status ändern</span>
+											</DropdownMenu.SubTrigger>
+											<DropdownMenu.SubContent>
+												<DropdownMenu.Item
+													on:click={() => {
+														changePublish(post.id, true);
+													}}
+												>
+													<Eye size={16} />
+													<p class="ml-2">Veröffentlichen</p>
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													on:click={() => {
+														changePublish(post.id, false);
+													}}
+												>
+													<EyeOff size={16} />
+													<p class="ml-2">Verbergen</p>
+												</DropdownMenu.Item>
+											</DropdownMenu.SubContent>
+										</DropdownMenu.Sub>
 									</DropdownMenu.Group>
 								</DropdownMenu.Content>
 							</DropdownMenu.Root>
@@ -73,7 +105,7 @@
 			{/each}
 		</div>
 	</div>
-	<div class="flex flex-col">
+	<!-- <div class="flex flex-col">
 		<h2 class="font-medium mb-3">Meine Berichte</h2>
 		<div class="grid grid-cols-3 gap-6">
 			{#if data.filteredPosts.length > 0}
@@ -91,7 +123,7 @@
 									{/if}
 								</div>
 							</div>
-							<p class="flex flex-1">Erstellt von {post.expand.author.name}</p>
+							<p class="flex flex-1">Erstellt von mir</p>
 							<div class="flex justify-end">
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger>
@@ -113,9 +145,9 @@
 											</DropdownMenu.Item>
 
 											<DropdownMenu.Separator />
-											<DropdownMenu.CheckboxItem bind:checked={published}>
+											<!-- <DropdownMenu.CheckboxItem bind:checked={published}>
 												Öffentlich
-											</DropdownMenu.CheckboxItem>
+											</DropdownMenu.CheckboxItem> -->
 										</DropdownMenu.Group>
 									</DropdownMenu.Content>
 								</DropdownMenu.Root>
@@ -127,5 +159,5 @@
 				Du hast noch keine Berichte erstellt
 			{/if}
 		</div>
-	</div>
+	</div> -->
 </div>
