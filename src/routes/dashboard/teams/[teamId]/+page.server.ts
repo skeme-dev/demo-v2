@@ -7,6 +7,9 @@ export const load = (async ({ params, locals }) => {
 	const team = await locals.pb.collection('teams').getOne(params.teamId, {
 		expand: 'trainers,events'
 	});
+	const events = await locals.pb.collection('events').getList(1, 10, {
+		filter: locals.pb.filter('corresponding_teams ~ {:id}', { id: params.teamId })
+	});
 
 	// set file object as url
 	const fileUrl = locals.pb.getFileUrl(team, team.team_image, {
@@ -18,7 +21,7 @@ export const load = (async ({ params, locals }) => {
 	const trainings = await locals.pb.collection('trainings').getList(1, 3, {
 		filter: locals.pb.filter('team ?= {:id}', { id: params.teamId })
 	});
-	return { team, trainings, users };
+	return { team, trainings, users, events };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {

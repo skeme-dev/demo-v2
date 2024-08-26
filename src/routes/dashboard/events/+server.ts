@@ -1,31 +1,43 @@
-import DataTableActions from '$lib/components/dashboard/components/DataTable/data-table-actions.svelte';
 import { json, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ locals, request, params }) => {
+export const POST: RequestHandler = async ({ locals, request }) => {
 	const data = await request.json();
 
-	const d1 = new Date(`${data.date} ${data.event_start}`);
-	const d2 = new Date(`${data.date} ${data.event_end}`);
+	const eventStart = new Date(`${data.date} ${data.event_start}`);
+	const eventEnd = new Date(`${data.date} ${data.event_end}`);
 
 	try {
 		await locals.pb.collection('events').create({
 			title: data.title,
 			description: data.description,
-			event_start: d1.toUTCString(),
-			event_end: d2.toUTCString(),
-			teams: [data.id]
+			event_start: eventStart,
+			event_end: eventEnd,
+			corresponding_teams: [data.id]
 		});
+		return json({ code: 200, message: 'Ok' });
 	} catch (error) {
 		console.error(error);
 	}
-
-	return json(data);
 };
 
 export const PUT: RequestHandler = async ({ locals, params }) => {
 	return new Response();
 };
 
-export const DELETE: RequestHandler = async ({ locals, params }) => {
-	return new Response();
+export const DELETE: RequestHandler = async ({ locals, request }) => {
+	const data = await request.json();
+
+	try {
+		await locals.pb.collection('events').delete(data.id);
+		return json({ code: 200, message: 'Ok' });
+	} catch (error) {
+		if (error.code == 404) {
+			return json({
+				status: 404,
+				message: "Post couldn't be found "
+			});
+		}
+
+		return json({ status: 400, message: 'Failed to delete post.' });
+	}
 };

@@ -8,6 +8,8 @@
 	import Label from '../../ui/label/label.svelte';
 	import Switch from '../../ui/switch/switch.svelte';
 	import { page } from '$app/stores';
+	import { invalidateAll } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	const monthNames = [
 		'Januar',
@@ -43,18 +45,11 @@
 	let nextDays: any[] = [];
 
 	let arr: any[] = [];
-
 	function renderCalendar() {
 		let firstDay = new Date(year, month, 1);
 		let lastDay = new Date(year, month + 1, 0);
 		let firstDayIndex = firstDay.getDay() === 0 ? 7 : firstDay.getDay(); //4
 		let numberOfDays = lastDay.getDate(); //31
-
-		let n = numberOfDays == 31 ? 2 : 1;
-
-		if (numberOfDays == 29) {
-			n = 0;
-		}
 
 		currentMonthDays = [];
 		lastDays = [];
@@ -106,21 +101,23 @@
 		});
 
 		formattedDate = selectedDate.split('.').reverse().join('-');
-
-		console.log(selectedDate);
 	}
 
 	async function handleResponse(res: Response) {
-		console.log(res);
 		const data = await res.json();
-		console.log(data);
+
+		if (data.status == 200) {
+			console.log('REQUEST: ', data.message);
+			dialogOpen = false;
+			await invalidateAll();
+		} else {
+			console.error('Anfrage konntet nicht verarbeitet werden');
+			toast.error('Anfrage konntet nicht verarbeitet werden');
+		}
 	}
 
 	async function createEvent() {
 		if (!eventTitle || !eventDescription) {
-			// error = {
-			// 	missing: true
-			// };
 			return alert('Fülle alle Felder aus.');
 		}
 		const request = await fetch('/dashboard/events/', {
@@ -149,8 +146,6 @@
 	let eventStart: string = '18:00';
 	let eventEnd: string = '19:00';
 	let includeTime: boolean = true;
-
-	$: console.log(includeTime);
 </script>
 
 <Dialog.Root bind:open={dialogOpen}>
