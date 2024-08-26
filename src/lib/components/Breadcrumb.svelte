@@ -27,7 +27,6 @@
 		let outputString: string = '/';
 		for (let i = 0; i < index + 1; i++) {
 			const element = arr[i];
-			console.log(element);
 			outputString += element + '/';
 		}
 		return outputString;

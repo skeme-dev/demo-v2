@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import Badge from '../ui/badge/badge.svelte';
 	import { roles } from '../roles';
+	import { page } from '$app/stores';
 
-	const user = getContext('user');
+	const user = $page.data.user;
 </script>
 
 <header class="flex justify-between w-full py-6 pr-6">

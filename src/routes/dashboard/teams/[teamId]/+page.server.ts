@@ -5,7 +5,7 @@ import type { PageServerLoad } from './$types';
 export const load = (async ({ params, locals }) => {
 	const users = await locals.pb.collection('users').getFullList({ sort: '-created' });
 	const team = await locals.pb.collection('teams').getOne(params.teamId, {
-		expand: 'trainers'
+		expand: 'trainers,events'
 	});
 
 	// set file object as url

@@ -1,6 +1,3 @@
-<script lang="ts">
-</script>
-
 <div class="w-full flex flex-col space-y-6">
 	<h1 class="text-4xl font-bold">Satzung</h1>
 	<h2 class="text-2xl font-semibold text-accent">

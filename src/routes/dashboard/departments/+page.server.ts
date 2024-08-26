@@ -41,7 +41,6 @@ export const actions = {
 		};
 
 		const record = await locals.pb.collection('teams').create(data);
-		console.log(record);
 	},
 	updateTeam: async ({ request, locals }) => {
 		const formData = await request.formData();

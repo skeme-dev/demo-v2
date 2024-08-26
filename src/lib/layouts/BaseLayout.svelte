@@ -160,8 +160,6 @@
 			teams: val.teams
 		};
 	});
-
-	console.log(routes);
 </script>
 
 <Header />

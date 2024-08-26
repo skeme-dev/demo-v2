@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-
-	console.log($page.error);
 </script>
 
 <div class="flex space-y-6 flex-col justify-center items-center h-screen">

@@ -2,9 +2,11 @@
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
 	import Button from '$lib/components/dashboard/ui/button/button.svelte';
 	import * as DropdownMenu from '$lib/components/dashboard/ui/dropdown-menu';
-	import { Eye, EyeOff, Plus } from 'lucide-svelte';
+	import * as AlertDialog from '$lib/components/dashboard/ui/alert-dialog';
+	import { Eye, EyeOff, Plus, Trash2 } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	export let data: PageData;
 
@@ -22,8 +24,54 @@
 			alert('Es ist ein Fehler aufgetreten');
 		}
 	}
+
+	let deleteDialogOpen: boolean = false;
+	let postIdDelete: string;
+
+	async function deletePost(id: string) {
+		const req = await fetch('/dashboard/posts/delete', {
+			method: 'POST',
+			body: JSON.stringify({ id: id })
+		});
+
+		const data = await req.json();
+
+		console.log(data);
+
+		if (data.code == 200) {
+			toast.success('Bericht wurde erfolgreich gelöscht');
+			await invalidateAll();
+		} else if (data.code == 400) {
+			toast.error('Beim Löschen ist ein Fehler aufgetreten.');
+		} else if (data.code == 404) {
+			toast.error('Der Bericht konnte nicht gefunden werden.');
+		}
+	}
 </script>
 
+<AlertDialog.Root bind:open={deleteDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Bist du sicher?</AlertDialog.Title>
+			<AlertDialog.Description>
+				Das Löschen eines Berichts kann nicht mehr rückgängig gemacht werden. Die Daten des Berichts
+				werden dauerhaft aus der Datenbank entfernt.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
+			<AlertDialog.Action asChild let:builder>
+				<Button
+					builders={[builder]}
+					variant="destructive"
+					on:click={() => {
+						deletePost(postIdDelete);
+					}}>Löschen</Button
+				>
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 <div class="w-full h-full flex flex-col">
 	<div class="flex justify-between items-center mb-6">
 		<div class="flex flex-col space-y-3">
@@ -53,52 +101,67 @@
 							</div>
 						</div>
 						<p class="flex flex-1">Erstellt von {post?.expand.author.name}</p>
-						<div class="flex justify-end">
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger>
-									<Button variant="outline">
-										<i class="text-lg ri-pencil-line" />
-										<p class="ml-3">Bearbeiten</p>
-									</Button>
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Content>
-									<DropdownMenu.Group>
-										<DropdownMenu.Label>Bericht bearbeiten</DropdownMenu.Label>
-										<DropdownMenu.Separator />
-										<DropdownMenu.Item on:click={() => goto(`/dashboard/editor?pid=${post.id}`)}
-											>Inhalt bearbeiten</DropdownMenu.Item
-										>
-										<DropdownMenu.Item>
-											<i class="ri-delete-bin-line" />
-											<p class="ml-2">Löschen</p>
-										</DropdownMenu.Item>
-										<DropdownMenu.Sub>
-											<DropdownMenu.SubTrigger>
-												<!-- <Eye size={16} /> -->
-												<span>Status ändern</span>
-											</DropdownMenu.SubTrigger>
-											<DropdownMenu.SubContent>
-												<DropdownMenu.Item
-													on:click={() => {
-														changePublish(post.id, true);
-													}}
-												>
-													<Eye size={16} />
-													<p class="ml-2">Veröffentlichen</p>
-												</DropdownMenu.Item>
-												<DropdownMenu.Item
-													on:click={() => {
-														changePublish(post.id, false);
-													}}
-												>
-													<EyeOff size={16} />
-													<p class="ml-2">Verbergen</p>
-												</DropdownMenu.Item>
-											</DropdownMenu.SubContent>
-										</DropdownMenu.Sub>
-									</DropdownMenu.Group>
-								</DropdownMenu.Content>
-							</DropdownMenu.Root>
+						<div class="flex justify-between">
+							{#if post?.expand.author.id == data.user.id}
+								<Button
+									size="icon"
+									variant="outline"
+									on:click={() => {
+										deleteDialogOpen = true;
+										postIdDelete = post?.id;
+									}}
+								>
+									<Trash2 size={18} />
+								</Button>
+								<DropdownMenu.Root>
+									<DropdownMenu.Trigger>
+										<Button variant="outline">
+											<i class="text-lg ri-pencil-line" />
+											<p class="ml-3">Bearbeiten</p>
+										</Button>
+									</DropdownMenu.Trigger>
+									<DropdownMenu.Content>
+										<DropdownMenu.Group>
+											<DropdownMenu.Label>Bericht bearbeiten</DropdownMenu.Label>
+											<DropdownMenu.Separator />
+											<DropdownMenu.Item on:click={() => goto(`/dashboard/editor?pid=${post.id}`)}
+												>Inhalt bearbeiten</DropdownMenu.Item
+											>
+
+											<DropdownMenu.Sub>
+												<DropdownMenu.SubTrigger>
+													<!-- <Eye size={16} /> -->
+													<span>Status ändern</span>
+												</DropdownMenu.SubTrigger>
+												<DropdownMenu.SubContent>
+													<DropdownMenu.Item
+														on:click={() => {
+															changePublish(post.id, true);
+														}}
+													>
+														<Eye size={16} />
+														<p class="ml-2">Veröffentlichen</p>
+													</DropdownMenu.Item>
+													<DropdownMenu.Item
+														on:click={() => {
+															changePublish(post.id, false);
+														}}
+													>
+														<EyeOff size={16} />
+														<p class="ml-2">Verbergen</p>
+													</DropdownMenu.Item>
+												</DropdownMenu.SubContent>
+											</DropdownMenu.Sub>
+										</DropdownMenu.Group>
+									</DropdownMenu.Content>
+								</DropdownMenu.Root>
+							{:else}
+								<div class=""></div>
+								<Button href={`/blog/preview/${post.id}`} variant="outline">
+									<Eye size={18} />
+									<p class="ml-2">Ansehen</p>
+								</Button>
+							{/if}
 						</div>
 					</div>
 				</div>

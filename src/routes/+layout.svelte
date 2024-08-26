@@ -3,6 +3,7 @@
 
 	import { screenWidthWriteable } from '$lib/stores/screenDimensionStore';
 	import { page } from '$app/stores';
+	import Quicklinks from '$lib/components/Quicklinks.svelte';
 
 	onMount(async () => {
 		screenWidthWriteable.set(document.documentElement.clientWidth);
@@ -15,4 +16,5 @@
 	});
 </script>
 
+<Quicklinks />
 <slot />

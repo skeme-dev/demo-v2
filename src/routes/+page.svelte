@@ -92,7 +92,7 @@
 		</div>
 
 		<div class="w-full flex h-full">
-			<div class="md:flex hidden">
+			<!-- <div class="md:flex hidden">
 				{#if browser}
 					<Carousel particlesToShow={2} dots={false}>
 						{#each placeholderBlogPosts as blogPost}
@@ -118,7 +118,7 @@
 						{/each}
 					</Carousel>
 				{/if}
-			</div>
+			</div> -->
 
 			<div class="md:hidden flex flex-col w-auto divide-solid space-y-8">
 				{#each placeholderBlogPosts as blogPost}

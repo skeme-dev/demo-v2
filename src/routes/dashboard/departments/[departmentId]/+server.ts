@@ -25,6 +25,4 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			error: true
 		});
 	}
-
-	return;
 };

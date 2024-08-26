@@ -4,7 +4,7 @@
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
 	import { Plus } from 'lucide-svelte';
-	// import { pb } from '$lib/db/pocketbase';
+
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
 	import Input from '$lib/components/dashboard/ui/input/input.svelte';
@@ -12,6 +12,9 @@
 	import { enhance } from '$app/forms';
 	import { roles } from '$lib/components/dashboard/roles';
 	import { slide } from 'svelte/transition';
+	import { Separator } from '$lib/components/dashboard/ui/separator';
+	import EventDialog from '$lib/components/dashboard/components/teams/EventDialog.svelte';
+	import Scheduler from '$lib/components/dashboard/components/teams/Scheduler.svelte';
 
 	const weekdays = [
 		'Montag',
@@ -30,18 +33,37 @@
 	$: filteredUsers = data.users.filter(
 		(user) => user.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
 	);
-	console.log(filteredUsers);
+	console.log(data);
 
 	let selectedTrainers: any[] = [];
 	let formElement: HTMLFormElement;
+	let eventDialogOpen: boolean = false;
+
+	const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short' });
+
+	// compare and format dates for event card
+	function compareAndFormat(d1: Date, d2: Date) {
+		const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short' });
+
+		console.log(d1.toLocaleDateString(), d2.toLocaleDateString());
+
+		const t1 = new Date(d1.toLocaleDateString()).getTime();
+		const t2 = new Date(d2.toLocaleDateString()).getTime();
+
+		if (d1.toLocaleDateString() == d2.toLocaleDateString()) {
+			return formatter.format(d1);
+		} else {
+			return `${formatter.format(d1)} - ${formatter.format(d2)}`;
+		}
+	}
 </script>
 
-<div class="flex flex-col w-full">
-	<div class="flex flex-col space-y-3 mb-6">
+<div class="flex flex-col w-full space-y-6">
+	<div class="flex flex-col space-y-3">
 		<h1 class="text-3xl font-semibold">Teams</h1>
 		<h3 class="font-medium text-gray-500">Verwalte dein Team</h3>
 	</div>
-	<div class="flex space-x-12">
+	<div class="flex space-x-12 !mb-8">
 		<div class="w-1/4 flex flex-col space-y-6 border-2 p-6 rounded-lg">
 			<div class="flex justify-between items-center">
 				<h1 class="text-lg font-semibold">{data.team.title}</h1>
@@ -319,5 +341,25 @@
 				</Table.Root>
 			</div>
 		</div>
+	</div>
+	<div class="flex flex-col">
+		<div class="flex justify-between items-center">
+			<div class="flex flex-col space-y-3">
+				<h1 class="text-lg font-medium">Events</h1>
+			</div>
+			<!-- <Button
+				on:click={() => {
+					eventDialogOpen = true;
+				}}
+			>
+				<Plus class="stroke-white mr-2 h-4 w-4" />
+				Event hinzufügen
+			</Button>
+			<EventDialog bind:dialogOpen={eventDialogOpen} />
+		 -->
+		</div>
+		<Separator class="mt-3" />
+
+		<Scheduler />
 	</div>
 </div>

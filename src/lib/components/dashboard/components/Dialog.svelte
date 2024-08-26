@@ -2,7 +2,7 @@
 	import { Button, buttonVariants } from '$lib/components/dashboard/ui/button/index.js';
 	import * as Dialog from '$lib/components/dashboard/ui/dialog/index';
 
-	export let triggerClassName = '';
+	export let triggerClassName: string = '';
 	export let triggerVariant:
 		| 'default'
 		| 'destructive'
@@ -11,15 +11,22 @@
 		| 'ghost'
 		| 'link'
 		| undefined;
-	export let dialogTitle = '';
-	export let dialogDescription = 'Erstelle eine Mannschaft';
+	export let dialogTitle: string = '';
+	export let dialogDescription: string = 'Erstelle eine Mannschaft';
+	export let dialogContentClassName: string = 'sm:max-w-1/2';
+	export let open: boolean = false;
+	export let hasTrigger: boolean = true;
 </script>
 
-<Dialog.Root closeOnEscape>
-	<Dialog.Trigger class={buttonVariants({ variant: triggerVariant, className: triggerClassName })}>
-		<slot name="dialogTrigger" />
-	</Dialog.Trigger>
-	<Dialog.Content class="sm:max-w-1/2">
+<Dialog.Root closeOnEscape bind:open>
+	{#if hasTrigger}
+		<Dialog.Trigger
+			class={buttonVariants({ variant: triggerVariant, className: triggerClassName })}
+		>
+			<slot name="dialogTrigger" />
+		</Dialog.Trigger>
+	{/if}
+	<Dialog.Content class={dialogContentClassName}>
 		<Dialog.Header>
 			<Dialog.Title>{dialogTitle}</Dialog.Title>
 			<Dialog.Description>{dialogDescription}</Dialog.Description>

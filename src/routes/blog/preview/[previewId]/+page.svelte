@@ -70,7 +70,7 @@
 	<header class="w-screen space-y-12 h-full pt-6 md:pt-24 px-6 md:px-36 flex flex-col">
 		<div class="flex flex-col justify-center items-center space-y-3 text-center">
 			<div
-				class="md:w-full px-2 py-1 border rounded-full border-blue-600 bg-blue-100 text-blue-600 font-semibold text-xs"
+				class="w-fit px-2 py-1 border rounded-full border-blue-600 bg-blue-100 text-blue-600 font-semibold text-xs"
 			>
 				Vorschauseite
 			</div>
