@@ -11,6 +11,16 @@
 	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 
+	const weekdays = [
+		'Montag',
+		'Dienstag',
+		'Mittwoch',
+		'Donnerstag',
+		'Freitag',
+		'Samstag',
+		'Sonntag'
+	];
+
 	const monthNames = [
 		'Januar',
 		'Februar',
@@ -208,14 +218,14 @@
 			</div>
 		</Dialog.Header>
 		<Dialog.Footer>
-			<Button variant="outline">Abbrechen</Button>
+			<Button variant="outline" on:click={() => (dialogOpen = false)}>Abbrechen</Button>
 			<Button type="submit" on:click={() => createEvent()}>Event erstellen</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>
 
-<div class="flex flex-col mt-6">
-	<div class="flex justify-start items-center mb-6">
+<div class="flex flex-col mt-6 space-y-6">
+	<div class="flex justify-start items-center">
 		<div class="flex space-x-3 items-center">
 			<Button on:click={() => prevMonth()} variant="outline" size="icon">
 				<ChevronLeft class="h-4 w-4" />
@@ -231,12 +241,27 @@
 	</div>
 	<!-- Grid layout -->
 	<div class="grid grid-cols-7">
-		{#each arr as v}
+		{#each weekdays as weekday, index}
+			<div
+				class:rounded-l-md={index == 0}
+				class:rounded-r-md={index == weekdays.length - 1}
+				class="border px-6 py-3 flex items-center justify-center"
+			>
+				{weekday.slice(0, 2)}
+			</div>
+		{/each}
+	</div>
+	<div class="grid grid-cols-7">
+		{#each arr as v, index}
 			<button
 				disabled={v.disabled}
 				on:click={() => openEventDialog(new Date(v.value))}
-				class="border p-6"
+				class="border h-[100px] w-full"
 				class:text-gray-400={v.disabled}
+				class:rounded-tl-md={index == 0}
+				class:rounded-tr-md={index == 6}
+				class:rounded-bl-md={index == arr.length - 7}
+				class:rounded-br-md={index == arr.length - 1}
 			>
 				{v.label}
 			</button>

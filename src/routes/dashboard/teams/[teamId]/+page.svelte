@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
-	import { Plus } from 'lucide-svelte';
+	import { CalendarClock, ChevronDown, Pen, Plus } from 'lucide-svelte';
 
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
@@ -15,16 +15,6 @@
 	import { Separator } from '$lib/components/dashboard/ui/separator';
 	import EventDialog from '$lib/components/dashboard/components/teams/EventDialog.svelte';
 	import Scheduler from '$lib/components/dashboard/components/teams/Scheduler.svelte';
-
-	const weekdays = [
-		'Montag',
-		'Dienstag',
-		'Mittwoch',
-		'Donnerstag',
-		'Freitag',
-		'Samstag',
-		'Sonntag'
-	];
 
 	export let data: PageData;
 
@@ -39,14 +29,14 @@
 	let formElement: HTMLFormElement;
 	let eventDialogOpen: boolean = false;
 
-	const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short' });
+	const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+	const formatter2 = new Intl.DateTimeFormat('de-DE', {
+		month: 'short',
+		day: '2-digit'
+	});
 
 	// compare and format dates for event card
 	function compareAndFormat(d1: Date, d2: Date) {
-		const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short' });
-
-		console.log(d1.toLocaleDateString(), d2.toLocaleDateString());
-
 		const t1 = new Date(d1.toLocaleDateString()).getTime();
 		const t2 = new Date(d2.toLocaleDateString()).getTime();
 
@@ -56,6 +46,36 @@
 			return `${formatter.format(d1)} - ${formatter.format(d2)}`;
 		}
 	}
+
+	function getEventsForDate(events: any[]) {
+		let iter = {};
+		const keysArr: number[] = [];
+
+		for (const ev of events) {
+			let d1 = new Date(ev.event_start);
+
+			if (!keysArr.includes(d1.getTime())) {
+				keysArr.push(d1.getTime());
+			}
+			// console.log(d1);
+		}
+
+		keysArr.forEach((el) => {
+			iter[el] = [];
+		});
+	}
+
+	let obj = getEventsForDate(data.events.items);
+
+	console.log(obj);
+
+	// Object.keys(obj).forEach((el) => {
+	// 	console.log(el);
+	// });
+
+	// Object.entries(obj).forEach((el) => {
+	// 	console.log(el);
+	// });
 </script>
 
 <div class="flex flex-col w-full space-y-6">
@@ -361,5 +381,46 @@
 		<Separator class="mt-3" />
 
 		<Scheduler />
+		<h2 class="mt-8 mb-3 font-medium">Alle Events</h2>
+		<div class="flex flex-col space-y-3">
+			{#each data.events.items as event}
+				<div class="flex space-x-6 rounded-md p-6 border-2">
+					<div class="w-[5%] flex items-center justify-center">
+						<CalendarClock />
+					</div>
+					<div class="w-[95%]">
+						<div class="grid grid-cols-5">
+							<div class="flex items-center col-span-2">
+								<h1 class="text-lg font-medium">{event.title}</h1>
+							</div>
+							<div class="flex justify-center items-center col-span-2">
+								<div class="flex space-x-6">
+									<div class="flex flex-col space-y-1">
+										<p class="text-sm font-medium">Von</p>
+										<Badge variant="secondary">
+											{formatter.format(new Date(event.event_start))} Uhr
+										</Badge>
+									</div>
+									<div class="flex flex-col space-y-1">
+										<p class="text-sm font-medium">Bis</p>
+										<Badge variant="secondary">
+											{formatter.format(new Date(event.event_end))} Uhr
+										</Badge>
+									</div>
+								</div>
+							</div>
+							<div class="flex justify-end items-center">
+								<Button variant="ghost" size="icon">
+									<Pen class="h-4 w-4" />
+								</Button>
+								<Button variant="ghost" size="icon">
+									<ChevronDown class="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
 	</div>
 </div>
