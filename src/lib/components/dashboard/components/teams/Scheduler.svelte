@@ -10,31 +10,7 @@
 	import { page } from '$app/stores';
 	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-
-	const weekdays = [
-		'Montag',
-		'Dienstag',
-		'Mittwoch',
-		'Donnerstag',
-		'Freitag',
-		'Samstag',
-		'Sonntag'
-	];
-
-	const monthNames = [
-		'Januar',
-		'Februar',
-		'März',
-		'April',
-		'Mai',
-		'Juni',
-		'Juli',
-		'August',
-		'September',
-		'Oktober',
-		'November',
-		'Dezember'
-	];
+	import { monthNames, weekdays } from '$lib/utils/calendar';
 
 	let date = new Date();
 

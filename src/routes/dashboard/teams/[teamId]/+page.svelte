@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
-	import { CalendarClock, ChevronDown, Pen, Plus } from 'lucide-svelte';
+	import { Plus } from 'lucide-svelte';
 
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
@@ -15,6 +15,7 @@
 	import { Separator } from '$lib/components/dashboard/ui/separator';
 	import EventDialog from '$lib/components/dashboard/components/teams/EventDialog.svelte';
 	import Scheduler from '$lib/components/dashboard/components/teams/Scheduler.svelte';
+	import { monthNames, weekdays } from '$lib/utils/calendar';
 
 	export let data: PageData;
 
@@ -23,7 +24,6 @@
 	$: filteredUsers = data.users.filter(
 		(user) => user.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
 	);
-	console.log(data);
 
 	let selectedTrainers: any[] = [];
 	let formElement: HTMLFormElement;
@@ -35,39 +35,52 @@
 		day: '2-digit'
 	});
 
-	// compare and format dates for event card
-	function compareAndFormat(d1: Date, d2: Date) {
-		const t1 = new Date(d1.toLocaleDateString()).getTime();
-		const t2 = new Date(d2.toLocaleDateString()).getTime();
+	// input format: DD.MM.YYYY
+	// output format: DD. [MONTH_SHORT]
+	function format2(str: string) {
+		const parts = str.split('.');
+		const day = parts[0];
+		const month = Number(parts[1]);
+		const monthName = monthNames[month - 1];
 
-		if (d1.toLocaleDateString() == d2.toLocaleDateString()) {
-			return formatter.format(d1);
-		} else {
-			return `${formatter.format(d1)} - ${formatter.format(d2)}`;
-		}
+		const d = new Date(parts[2], parts[1] - 1, parts[0]);
+
+		console.log(str, d.getDay());
+
+		return { dateString: `${day}. ${monthName.slice(0, 3)}`, weekday: weekdays[d.getDay() - 1] };
 	}
 
+	// compare and format dates for event card
+	// function compareAndFormat(d1: Date, d2: Date) {
+	// 	const t1 = new Date(d1.toLocaleDateString()).getTime();
+	// 	const t2 = new Date(d2.toLocaleDateString()).getTime();
+
+	// 	if (d1.toLocaleDateString() == d2.toLocaleDateString()) {
+	// 		return formatter.format(d1);
+	// 	} else {
+	// 		return `${formatter.format(d1)} - ${formatter.format(d2)}`;
+	// 	}
+	// }
+
+	const m = new Map();
+
 	function getEventsForDate(events: any[]) {
-		let iter = {};
-		const keysArr: number[] = [];
-
 		for (const ev of events) {
-			let d1 = new Date(ev.event_start);
+			const dateObj = new Date(ev.event_start);
+			const date = dateObj.toLocaleDateString();
 
-			if (!keysArr.includes(d1.getTime())) {
-				keysArr.push(d1.getTime());
+			if (m.has(date)) {
+				m.set(date, [...m.get(date), ev]);
+			} else {
+				m.set(date, [ev]);
 			}
-			// console.log(d1);
 		}
-
-		keysArr.forEach((el) => {
-			iter[el] = [];
+		m.forEach((val, key) => {
+			console.log(key, val);
 		});
 	}
 
-	let obj = getEventsForDate(data.events.items);
-
-	console.log(obj);
+	getEventsForDate(data.events.items);
 
 	// Object.keys(obj).forEach((el) => {
 	// 	console.log(el);
@@ -383,7 +396,7 @@
 		<Scheduler />
 		<h2 class="mt-8 mb-3 font-medium">Alle Events</h2>
 		<div class="flex flex-col space-y-3">
-			{#each data.events.items as event}
+			<!-- {#each data.events.items as event}
 				<div class="flex space-x-6 rounded-md p-6 border-2">
 					<div class="w-[5%] flex items-center justify-center">
 						<CalendarClock />
@@ -418,6 +431,25 @@
 								</Button>
 							</div>
 						</div>
+					</div>
+				</div>
+			{/each} -->
+			{#each [...m] as [key, value]}
+				<div class="flex space-x-3">
+					<div class="flex justify-center items-center w-[15%] h-full bg-gray-100 p-6 rounded-lg">
+						<div class="flex flex-col">
+							<span>
+								{format2(key).dateString}
+							</span>
+							<span>{format2(key).weekday}</span>
+						</div>
+					</div>
+					<div class="flex flex-1 flex-col space-y-3">
+						{#each value as val}
+							<div class="col-span-6 border-2 rounded-lg p-6">
+								<p>{val.title}</p>
+							</div>
+						{/each}
 					</div>
 				</div>
 			{/each}
