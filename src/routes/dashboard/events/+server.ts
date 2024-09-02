@@ -34,7 +34,7 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 		if (error.code == 404) {
 			return json({
 				status: 404,
-				message: "Post couldn't be found "
+				message: "Post couldn't be found"
 			});
 		}
 

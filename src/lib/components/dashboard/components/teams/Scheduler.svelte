@@ -3,7 +3,6 @@
 	import Button from '../../ui/button/button.svelte';
 	import { ChevronLeft } from 'lucide-svelte';
 	import * as Dialog from '../../ui/dialog/index';
-	import * as Card from '../../ui/card/index';
 	import Input from '../../ui/input/input.svelte';
 	import Label from '../../ui/label/label.svelte';
 	import Switch from '../../ui/switch/switch.svelte';
@@ -12,19 +11,14 @@
 	import { toast } from 'svelte-sonner';
 	import { monthNames, weekdays } from '$lib/utils/calendar';
 
+	export let eventMap;
+
 	let date = new Date();
 
 	let year = date.getFullYear();
 	let month = date.getMonth();
 
-	// let formattedDate = date.toLocaleString('de-DE', {
-	// 	month: 'long',
-	// 	year: 'numeric'
-	// });
-
 	let monthlastdate = new Date(year, month, 0).getDate();
-
-	// console.log(new Date('31.13.2024').toLocaleDateString());
 
 	let currentMonthDays: any[] = [];
 	let lastDays: any[] = [];
@@ -121,6 +115,22 @@
 		handleResponse(request);
 	}
 
+	function getEventsForDate(events: Map<string, any[]>, date: string): any[] {
+		const dateParts: string[] = date.split('.');
+
+		const d = `${dateParts[1]}.${dateParts[0]}.${dateParts[2]}`;
+
+		const eventArray: any[] = events.get(d);
+
+		console.log(d);
+
+		if (!eventArray) {
+			return [];
+		}
+
+		return eventArray;
+	}
+
 	let dialogOpen: boolean = false;
 	let selectedDate: string | Date;
 	let formattedDate: string | Date;
@@ -183,14 +193,6 @@
 						<Label for="include_time">Mit Uhrzeiten</Label>
 					</div>
 				</div>
-
-				<!-- <div class="rounded p-3">
-					{new Date(selectedDate).toLocaleDateString('de-DE', {
-						day: '2-digit',
-						month: 'long',
-						year: 'numeric'
-					})}
-				</div> -->
 			</div>
 		</Dialog.Header>
 		<Dialog.Footer>
@@ -219,11 +221,13 @@
 	<div class="grid grid-cols-7">
 		{#each weekdays as weekday, index}
 			<div
-				class:rounded-l-md={index == 0}
-				class:rounded-r-md={index == weekdays.length - 1}
-				class="border px-6 py-3 flex items-center justify-center"
+				class:rounded-l-lg={index == 0}
+				class:rounded-r-lg={index == weekdays.length - 1}
+				class="font-medium border px-6 py-3 flex items-center justify-center"
 			>
-				{weekday.slice(0, 2)}
+				<p>
+					{weekday.slice(0, 2)}
+				</p>
 			</div>
 		{/each}
 	</div>
@@ -232,14 +236,29 @@
 			<button
 				disabled={v.disabled}
 				on:click={() => openEventDialog(new Date(v.value))}
-				class="border h-[100px] w-full"
+				class="border flex h-[15vh] w-full"
 				class:text-gray-400={v.disabled}
-				class:rounded-tl-md={index == 0}
-				class:rounded-tr-md={index == 6}
-				class:rounded-bl-md={index == arr.length - 7}
-				class:rounded-br-md={index == arr.length - 1}
+				class:rounded-tl-lg={index == 0}
+				class:rounded-tr-lg={index == 6}
+				class:rounded-bl-lg={index == arr.length - 7}
+				class:rounded-br-lg={index == arr.length - 1}
 			>
-				{v.label}
+				<div class="w-full h-full p-6 flex flex-col items-start space-y-2">
+					<p>
+						{v.label}
+					</p>
+					{#if !v.disabled}
+						{#if getEventsForDate(eventMap, v.value).length > 0}
+							{#each getEventsForDate(eventMap, v.value) as event}
+								<div
+									class="text-xs p-1 bg-orange-200 rounded-md text-[#eb5a23] w-full font-medium text-left"
+								>
+									{event.title}
+								</div>
+							{/each}
+						{/if}
+					{/if}
+				</div>
 			</button>
 		{/each}
 	</div>

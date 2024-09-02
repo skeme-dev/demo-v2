@@ -52,7 +52,7 @@ export const actions: Actions = {
 			const data = {
 				'trainers+': trainerIds
 			};
-			const record = await locals.pb.collection('teams').update(params.teamId as string, data);
+			await locals.pb.collection('teams').update(params.teamId as string, data);
 			return {
 				success: true
 			};

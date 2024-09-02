@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
-	import { Plus } from 'lucide-svelte';
+	import { Clock, Pencil, Plus, Trash2 } from 'lucide-svelte';
 
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
@@ -29,7 +29,7 @@
 	let formElement: HTMLFormElement;
 	let eventDialogOpen: boolean = false;
 
-	const formatter = new Intl.DateTimeFormat('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+	const formatter = new Intl.DateTimeFormat('de-DE', { timeStyle: 'short' });
 	const formatter2 = new Intl.DateTimeFormat('de-DE', {
 		month: 'short',
 		day: '2-digit'
@@ -44,8 +44,6 @@
 		const monthName = monthNames[month - 1];
 
 		const d = new Date(parts[2], parts[1] - 1, parts[0]);
-
-		console.log(str, d.getDay());
 
 		return { dateString: `${day}. ${monthName.slice(0, 3)}`, weekday: weekdays[d.getDay() - 1] };
 	}
@@ -62,9 +60,9 @@
 	// 	}
 	// }
 
-	const m = new Map();
+	const m = new Map<string, any[]>();
 
-	function getEventsForDate(events: any[]) {
+	function getEventMap(events: any[]) {
 		for (const ev of events) {
 			const dateObj = new Date(ev.event_start);
 			const date = dateObj.toLocaleDateString();
@@ -75,12 +73,9 @@
 				m.set(date, [ev]);
 			}
 		}
-		m.forEach((val, key) => {
-			console.log(key, val);
-		});
 	}
 
-	getEventsForDate(data.events.items);
+	getEventMap(data.events.items);
 
 	// Object.keys(obj).forEach((el) => {
 	// 	console.log(el);
@@ -393,7 +388,7 @@
 		</div>
 		<Separator class="mt-3" />
 
-		<Scheduler />
+		<Scheduler eventMap={m} />
 		<h2 class="mt-8 mb-3 font-medium">Alle Events</h2>
 		<div class="flex flex-col space-y-3">
 			<!-- {#each data.events.items as event}
@@ -436,18 +431,46 @@
 			{/each} -->
 			{#each [...m] as [key, value]}
 				<div class="flex space-x-3">
-					<div class="flex justify-center items-center w-[15%] h-full bg-gray-100 p-6 rounded-lg">
-						<div class="flex flex-col">
-							<span>
+					<div class="flex w-[15%] h-full bg-gray-100 p-6 rounded-lg">
+						<div class="flex flex-col space-y-2">
+							<span class="text-xl font-medium">
 								{format2(key).dateString}
 							</span>
-							<span>{format2(key).weekday}</span>
+							<span class="text-gray-500 text-sm font-medium">{format2(key).weekday}</span>
 						</div>
 					</div>
-					<div class="flex flex-1 flex-col space-y-3">
+					<div class="flex flex-1 flex-col" class:space-y-3={value.length > 1}>
 						{#each value as val}
-							<div class="col-span-6 border-2 rounded-lg p-6">
-								<p>{val.title}</p>
+							<div
+								class:h-full={value.length == 1}
+								class="flex items-center col-span-6 border-2 rounded-lg py-6 pr-6 pl-4"
+							>
+								<div class="w-1 h-full bg-[#eb5a23] rounded-full mr-3"></div>
+								<div class="flex flex-col space-y-1">
+									<h1 class="text-lg font-semibold">{val.title}</h1>
+									<div class="flex space-x-6">
+										<p class="text-sm">
+											{val.description}
+										</p>
+										<div class="flex items-center space-x-2">
+											<Clock class="w-4 h-4" />
+											<div class="text-sm">
+												{formatter.format(new Date(val.event_start))} - {formatter.format(
+													new Date(val.event_end)
+												)} Uhr
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="ml-auto flex space-x-3">
+									<Button size="icon" variant="outline">
+										<Pencil class="w-4 h-4" />
+									</Button>
+									<Button size="icon" variant="outline">
+										<Trash2 class="w-4 h-4" />
+									</Button>
+								</div>
 							</div>
 						{/each}
 					</div>
