@@ -264,7 +264,7 @@
 	<div class="flex flex-col w-screen justify-center items-center pb-12">
 		<div class="flex flex-col w-2/3 mt-6">
 			{#if editor}
-				<!-- <h1 class="text-gray-600 text-sm font-semibold mb-3">Bild</h1>
+				<h1 class="text-gray-600 text-sm font-semibold mb-3">Bild</h1>
 				<div
 					class={`flex flex-col ${
 						imageFiles.length === 0 && 'py-12'
@@ -320,7 +320,7 @@
 							</div>
 						</div>
 					{/if}
-				</div> -->
+				</div>
 				{#if data.record}
 					<div class="w-full flex space-x-6 mt-6">
 						<div class="w-1/2 flex flex-col">

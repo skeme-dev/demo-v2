@@ -4,7 +4,7 @@
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
 	import { Clock, Pencil, Plus, Trash2 } from 'lucide-svelte';
-
+	import * as AlertDialog from '$lib/components/dashboard/ui/alert-dialog';
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
 	import Input from '$lib/components/dashboard/ui/input/input.svelte';
@@ -16,6 +16,8 @@
 	import EventDialog from '$lib/components/dashboard/components/teams/EventDialog.svelte';
 	import Scheduler from '$lib/components/dashboard/components/teams/Scheduler.svelte';
 	import { monthNames, weekdays } from '$lib/utils/calendar';
+	import { invalidateAll } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	export let data: PageData;
 
@@ -60,6 +62,13 @@
 	// 	}
 	// }
 
+	function sortDates(date1: string | Date, date2: string | Date) {
+		const d1 = new Date(date1);
+		const d2 = new Date(date2);
+
+		return d1 - d2;
+	}
+
 	const m = new Map<string, any[]>();
 
 	function getEventMap(events: any[]) {
@@ -77,6 +86,18 @@
 
 	getEventMap(data.events.items);
 
+	function sortEventMap(m: Map<string, any[]>) {
+		const marray = [...m];
+		marray.sort((a, b) => sortDates(a[0], b[0]));
+		console.log(marray);
+	}
+
+	console.log(sortEventMap(m));
+
+	$: if (data.events) {
+		getEventMap(data.events.items);
+	}
+
 	// Object.keys(obj).forEach((el) => {
 	// 	console.log(el);
 	// });
@@ -84,7 +105,52 @@
 	// Object.entries(obj).forEach((el) => {
 	// 	console.log(el);
 	// });
+
+	async function deleteEvent(eventId: string) {
+		const req = await fetch('/dashboard/events/', {
+			method: 'DELETE',
+			body: JSON.stringify({ id: eventId })
+		});
+
+		const data = await req.json();
+
+		if (data.code == 200) {
+			console.log('testttt');
+			await invalidateAll();
+		} else if (data.code == 400) {
+			toast.error('Beim Löschen ist ein Fehler aufgetreten.');
+		} else if (data.code == 404) {
+			toast.error('Der Bericht konnte nicht gefunden werden.');
+		}
+	}
+
+	let eventToDelete: string = '';
+	let deleteEventDialogOpen: boolean = false;
 </script>
+
+<AlertDialog.Root bind:open={deleteEventDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Bist du sicher?</AlertDialog.Title>
+			<AlertDialog.Description>
+				Das Löschen eines Events kann nicht mehr rückgängig gemacht werden. Die Daten des Events
+				werden dauerhaft aus der Datenbank entfernt.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
+			<AlertDialog.Action asChild let:builder>
+				<Button
+					builders={[builder]}
+					variant="destructive"
+					on:click={() => {
+						deleteEvent(eventToDelete);
+					}}>Löschen</Button
+				>
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 
 <div class="flex flex-col w-full space-y-6">
 	<div class="flex flex-col space-y-3">
@@ -467,7 +533,14 @@
 									<Button size="icon" variant="outline">
 										<Pencil class="w-4 h-4" />
 									</Button>
-									<Button size="icon" variant="outline">
+									<Button
+										on:click={() => {
+											eventToDelete = val.id;
+											deleteEventDialogOpen = true;
+										}}
+										size="icon"
+										variant="outline"
+									>
 										<Trash2 class="w-4 h-4" />
 									</Button>
 								</div>

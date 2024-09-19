@@ -86,7 +86,7 @@
 	async function handleResponse(res: Response) {
 		const data = await res.json();
 
-		if (data.status == 200) {
+		if (data.code == 200) {
 			console.log('REQUEST: ', data.message);
 			dialogOpen = false;
 			await invalidateAll();
@@ -121,8 +121,6 @@
 		const d = `${dateParts[1]}.${dateParts[0]}.${dateParts[2]}`;
 
 		const eventArray: any[] = events.get(d);
-
-		console.log(d);
 
 		if (!eventArray) {
 			return [];

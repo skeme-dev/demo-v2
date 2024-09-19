@@ -2,9 +2,13 @@ export const createImage = (url: string) =>
 	new Promise((resolve, reject) => {
 		const image = new Image();
 		image.addEventListener('load', () => resolve(image));
-		image.addEventListener('error', (error) => reject(error));
+		image.addEventListener('error', (error) => {
+			console.log(error);
+			reject(error);
+		});
 		image.setAttribute('crossOrigin', 'anonymous'); // needed to avoid cross-origin issues on CodeSandbox
 		image.src = url;
+		console.log(image);
 	});
 
 function getRadianAngle(degreeValue) {
@@ -32,6 +36,8 @@ export async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
 	// draw rotated image and store data.
 	ctx.drawImage(image, safeArea / 2 - image.width * 0.5, safeArea / 2 - image.height * 0.5);
 	const data = ctx.getImageData(0, 0, safeArea, safeArea);
+
+	console.log(data);
 
 	// set canvas width to final desired crop size - this will clear existing context
 	canvas.width = pixelCrop.width;

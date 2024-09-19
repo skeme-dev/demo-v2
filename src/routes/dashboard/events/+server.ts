@@ -34,10 +34,10 @@ export const DELETE: RequestHandler = async ({ locals, request }) => {
 		if (error.code == 404) {
 			return json({
 				status: 404,
-				message: "Post couldn't be found"
+				message: "Event couldn't be found"
 			});
 		}
 
-		return json({ status: 400, message: 'Failed to delete post.' });
+		return json({ status: 400, message: 'Failed to delete event.' });
 	}
 };

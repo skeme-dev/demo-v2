@@ -13,25 +13,6 @@
 	let aspect = 8 / 5;
 	let image, fileinput, pixelCrop, croppedImage;
 
-	const supportedAspects = [
-		{
-			label: '8:5 (Standard)',
-			value: 8 / 5
-		},
-		{
-			label: '16:9',
-			value: 16 / 9
-		},
-		{
-			label: '4:3',
-			value: 4 / 3
-		},
-		{
-			label: '2:1',
-			value: 2 / 1
-		}
-	];
-
 	export let imageUrl;
 	let open = false;
 
@@ -65,18 +46,6 @@
 			</Dialog.Description>
 		</Dialog.Header>
 		<div class="space-y-3 h-[50vh]">
-			<div class="">
-				<Select.Root onSelectedChange={(v) => (aspect = v)}>
-					<Select.Trigger class="w-[180px]">
-						<Select.Value placeholder="Theme" />
-					</Select.Trigger>
-					<Select.Content>
-						{#each supportedAspects as ratio}
-							<Select.Item value={ratio.value}>{ratio.label}</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
-			</div>
 			<div class="h-[90%]">
 				<div class="rounded-xl relative w-full h-full">
 					<Cropper
