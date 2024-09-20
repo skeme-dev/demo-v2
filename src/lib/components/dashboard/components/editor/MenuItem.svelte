@@ -7,7 +7,7 @@
 </script>
 
 <button
-	class={`w-9 py-1 rounded-lg ${isActive ? 'bg-gray-100' : ''}`}
+	class={`cursor-pointer flex justify-center items-center w-9 py-1 px-3 rounded-lg hover:bg-gray-100 ${isActive ? 'bg-black text-white hover:bg-black' : ''}`}
 	{title}
 	on:click={action}
 	disabled={disable}
