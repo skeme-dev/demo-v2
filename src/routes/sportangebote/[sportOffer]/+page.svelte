@@ -86,23 +86,25 @@
 		<div class="flex flex-col space-y-6">
 			<h1 class="text-4xl font-bold">{data.record.label}</h1>
 			<p class="text-lg">{data.record.description}</p>
-			<div class="flex bg-accent text-white p-6 md:w-fit w-full md:flex-row space-x-6 rounded">
-				<div class="flex justify-center items-center md:w-1/5 w-20">
-					<img
-						class="rounded"
-						src={sportOffersObject.departmentLead.profilePictureURL}
-						alt={'Profilbild von ' + sportOffersObject.departmentLead.name}
-					/>
-				</div>
-				<div class="flex flex-col space-y-2">
-					<h3 class="text-xl font-semibold">{data?.record.expand.leader.name}</h3>
-					<span>Abteilungsleiter</span>
-					<div class="flex flex-col">
-						<span>{data?.record.expand.leader.phoneNumber}</span>
-						<span>{data?.record.expand.leader.email}</span>
+			{#if data?.record.expand.leader}
+				<div class="flex bg-accent text-white p-6 md:w-fit w-full md:flex-row space-x-6 rounded">
+					<div class="flex justify-center items-center md:w-1/5 w-20">
+						<img
+							class="rounded"
+							src={sportOffersObject.departmentLead.profilePictureURL}
+							alt={'Profilbild von ' + sportOffersObject.departmentLead.name}
+						/>
+					</div>
+					<div class="flex flex-col space-y-2">
+						<h3 class="text-xl font-semibold">{data?.record.expand.leader.name}</h3>
+						<span>Abteilungsleiter</span>
+						<div class="flex flex-col">
+							<span>{data?.record.expand.leader.phoneNumber}</span>
+							<span>{data?.record.expand.leader.email}</span>
+						</div>
 					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 		<div class="flex flex-col space-y-6">
 			<h2 class="text-2xl font-semibold">Unsere Mannschaften</h2>

@@ -2,16 +2,83 @@
 	import Badge from '../ui/badge/badge.svelte';
 	import { roles } from '../roles';
 	import { page } from '$app/stores';
+	import * as Breadcrumb from '../ui/breadcrumb/index';
+	import { House } from 'lucide-svelte';
 
-	const user = $page.data.user;
+	// get relevant parts of pathname (everything after /dashboard)
+	let pathnameArray = $page.url.pathname.split('/');
+
+	pathnameArray = pathnameArray.slice(-1 * (pathnameArray.length - 2), pathnameArray.length);
+
+	function getBreadcrumbArray(arr: string[]) {
+		let breadcrumbArray: string[] = [];
+		switch (arr[0]) {
+			case 'users':
+				breadcrumbArray.push('Benutzer');
+				break;
+
+			case 'posts':
+				breadcrumbArray.push('Berichte');
+				break;
+
+			case 'teams':
+				breadcrumbArray.push('Teams');
+				break;
+			case 'departments':
+				breadcrumbArray.push('Abteilungen');
+				break;
+
+			default:
+				break;
+		}
+
+		if (arr.length > 1) {
+			if (breadcrumbArray.includes('Abteilung')) {
+				breadcrumbArray.push($page.data.department.label);
+			}
+			if (breadcrumbArray.includes('Teams')) {
+				breadcrumbArray.push($page.data.team.title);
+			}
+		}
+
+		return breadcrumbArray;
+	}
+
+	const breadcrumbArray = getBreadcrumbArray(pathnameArray);
 </script>
 
 <header class="flex justify-between w-full py-6 pr-6">
 	<div class="flex items-center space-x-2">
-		<p class="text-sm">Deine Rolle:</p>
+		<!-- <p class="text-sm">Deine Rolle:</p>
 		<Badge variant="secondary">
 			{roles.get(user?.role)}
-		</Badge>
+		</Badge> -->
+		{#if $page.url.pathname != '/dashboard'}
+			<Breadcrumb.Root>
+				<Breadcrumb.List>
+					<Breadcrumb.Item>
+						<Breadcrumb.Link href="/dashboard">
+							<House size={16} />
+						</Breadcrumb.Link>
+					</Breadcrumb.Item>
+
+					{#if breadcrumbArray}
+						{#each breadcrumbArray as part, index}
+							<Breadcrumb.Separator />
+							<Breadcrumb.Item>
+								<Breadcrumb.Link asChild let:attrs>
+									<a href="/components" {...attrs}>{part}</a>
+								</Breadcrumb.Link>
+							</Breadcrumb.Item>
+							<!-- <Breadcrumb.Separator />
+						<Breadcrumb.Item>
+							<Breadcrumb.Page>Breadcrumb</Breadcrumb.Page>
+						</Breadcrumb.Item> -->
+						{/each}
+					{/if}
+				</Breadcrumb.List>
+			</Breadcrumb.Root>
+		{/if}
 	</div>
 	<div class="flex space-x-3">
 		<button class="border bg-white flex justify-center items-center rounded-full w-10 h-10">

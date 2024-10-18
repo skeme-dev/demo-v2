@@ -4,6 +4,8 @@ import { redirect } from '@sveltejs/kit';
 export const load = (async ({ locals }) => {
 	let correspondingDepartment;
 
+	const users = await locals.pb.collection('users').getFullList();
+
 	if (locals.pb.authStore.baseModel.role == 'DEPARTMENT_LEADER') {
 		correspondingDepartment = await locals.pb
 			.collection('departments')
@@ -14,12 +16,9 @@ export const load = (async ({ locals }) => {
 		throw redirect(303, '/dashboard/departments/' + correspondingDepartment.items[0].id);
 	}
 
-	const users = await locals.pb.collection('users').getFullList();
-	const teams = await locals.pb.collection('teams').getFullList();
-	return {
-		users,
-		teams
-	};
+	const departments = await locals.pb.collection('departments').getFullList();
+
+	return { departments, users };
 }) satisfies PageServerLoad;
 
 export const actions = {

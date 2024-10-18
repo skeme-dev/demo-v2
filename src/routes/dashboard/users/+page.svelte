@@ -46,7 +46,7 @@
 	<div class="flex justify-between items-center">
 		<div class="flex flex-col space-y-3">
 			<h1 class="text-3xl font-semibold">Benutzer</h1>
-			<h3 class="font-medium text-gray-500">Verwalte alle Benutzer dieser Anwendung</h3>
+			<h3 class="font-medium text-gray-500">Verwalte alle Benutzer des Vereins</h3>
 		</div>
 		<Button>
 			<Plus class="stroke-white mr-2 h-4 w-4" />

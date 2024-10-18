@@ -10,7 +10,7 @@
 		| 'secondary'
 		| 'ghost'
 		| 'link'
-		| undefined;
+		| undefined = 'default';
 	export let dialogTitle: string = '';
 	export let dialogDescription: string = 'Erstelle eine Mannschaft';
 	export let dialogContentClassName: string = 'sm:max-w-1/2';

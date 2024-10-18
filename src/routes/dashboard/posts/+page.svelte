@@ -7,8 +7,14 @@
 	import type { PageData } from './$types';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import Input from '$lib/components/dashboard/ui/input/input.svelte';
+	import Label from '$lib/components/dashboard/ui/label/label.svelte';
+	import { enhance } from '$app/forms';
 
 	export let data: PageData;
+	export let form;
+	let createPostDialogOpen: boolean = false;
+	let formElement: HTMLFormElement;
 
 	async function changePublish(postId: string, publish: boolean) {
 		const request = await fetch('/dashboard/posts/publish', {
@@ -36,8 +42,6 @@
 
 		const data = await req.json();
 
-		console.log(data);
-
 		if (data.code == 200) {
 			toast.success('Bericht wurde erfolgreich gelöscht');
 			await invalidateAll();
@@ -52,7 +56,7 @@
 <AlertDialog.Root bind:open={deleteDialogOpen}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
-			<AlertDialog.Title>Bist du sicher?</AlertDialog.Title>
+			<AlertDialog.Title>Bericht löschen</AlertDialog.Title>
 			<AlertDialog.Description>
 				Das Löschen eines Berichts kann nicht mehr rückgängig gemacht werden. Die Daten des Berichts
 				werden dauerhaft aus der Datenbank entfernt.
@@ -72,13 +76,44 @@
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
+<AlertDialog.Root bind:open={createPostDialogOpen}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Bericht erstellen</AlertDialog.Title>
+			<AlertDialog.Description>
+				Erstelle einen Bericht, indem du einen Titel eingibst. Du wirst dann weitergeleitet.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<form action="/dashboard/posts?/createPost" method="post" bind:this={formElement} use:enhance>
+			<div class="flex flex-col space-y-3 mb-3">
+				<Label for="title">Titel</Label>
+				<Input id="title" name="title" />
+			</div>
+		</form>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
+			<AlertDialog.Action asChild let:builder>
+				<Button
+					builders={[builder]}
+					on:click={() => {
+						formElement.submit();
+					}}>Erstellen</Button
+				>
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
 <div class="w-full h-full flex flex-col">
 	<div class="flex justify-between items-center mb-6">
 		<div class="flex flex-col space-y-3">
 			<h1 class="text-3xl font-semibold">Berichte</h1>
 			<h3 class="font-medium text-gray-500">Erstelle und verwalte deine Berichte</h3>
 		</div>
-		<Button href="/dashboard/editor">
+		<Button
+			on:click={() => {
+				createPostDialogOpen = true;
+			}}
+		>
 			<Plus class="stroke-white mr-2 h-4 w-4" />
 			Bericht erstellen
 		</Button>

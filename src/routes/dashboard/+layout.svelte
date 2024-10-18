@@ -5,6 +5,7 @@
 	import { currentUser } from '$lib/stores/user';
 
 	import { setContext } from 'svelte';
+	import { Toaster } from 'svelte-sonner';
 	import { writable } from 'svelte/store';
 
 	export let data;
@@ -14,6 +15,8 @@
 
 	setContext('user', $userStore);
 </script>
+
+<Toaster richColors />
 
 <div class="backend-font w-screen h-screen flex bg-[#FCFCFD]">
 	{#if $page.url.pathname.includes('editor') || $page.url.pathname.includes('login') || $page.url.pathname.includes('register')}

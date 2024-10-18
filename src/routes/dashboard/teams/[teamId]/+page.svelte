@@ -18,6 +18,7 @@
 	import { monthNames, weekdays } from '$lib/utils/calendar';
 	import { invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import UserDialog from '$lib/components/dashboard/components/UserDialog.svelte';
 
 	export let data: PageData;
 
@@ -92,8 +93,6 @@
 		console.log(marray);
 	}
 
-	console.log(sortEventMap(m));
-
 	$: if (data.events) {
 		getEventMap(data.events.items);
 	}
@@ -126,6 +125,7 @@
 
 	let eventToDelete: string = '';
 	let deleteEventDialogOpen: boolean = false;
+	let createTrainerDialogOpen: boolean = false;
 </script>
 
 <AlertDialog.Root bind:open={deleteEventDialogOpen}>
@@ -153,9 +153,194 @@
 </AlertDialog.Root>
 
 <div class="flex flex-col w-full space-y-6">
-	<div class="flex flex-col space-y-3">
+	<div class="flex flex-col space-y-3 mb-8">
 		<h1 class="text-3xl font-semibold">Teams</h1>
 		<h3 class="font-medium text-gray-500">Verwalte dein Team</h3>
+	</div>
+	<div class="space-y-12">
+		<div class="flex w-full border-t-2 pt-6">
+			<div class="w-1/3">
+				<h1 class="font-medium text-lg">Mannschaftsname</h1>
+			</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">test</div>
+			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
+				<Button variant="outline" size="icon">
+					<Pencil size={16} />
+				</Button>
+			</div>
+		</div>
+		<div class="flex w-full border-t-2 pt-6">
+			<div class="w-1/3">
+				<h1 class="font-medium text-lg">Beschreibung</h1>
+			</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">test</div>
+			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
+				<Button variant="outline" size="icon">
+					<Pencil size={16} />
+				</Button>
+			</div>
+		</div>
+		<div class="flex w-full border-t-2 pt-6">
+			<div class="w-1/3">
+				<h1 class="font-medium text-lg">Teambild</h1>
+			</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">Hier soll mal ein Bild angezeigt werden</div>
+			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
+				<Button variant="outline" size="icon">
+					<Pencil size={16} />
+				</Button>
+			</div>
+		</div>
+		<div class="flex w-full border-t-2 pt-6">
+			<div class="w-1/3">
+				<h1 class="font-medium text-lg">Trainer</h1>
+			</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">
+				{#each data?.team?.expand.trainers as trainer}
+					<div class="flex justify-between items-center border-2 p-3 rounded-lg">
+						<div class="flex flex-col space-y-3">
+							<Badge class="w-fit" variant="outline">
+								{#if trainer.role == 'TRAINER'}
+									Trainer
+								{:else if trainer.role == 'ADMINISTRATOR'}
+									Administrator
+								{:else}
+									Benutzer
+								{/if}
+							</Badge>
+							<span class="text-lg font-medium">
+								{trainer.name}
+							</span>
+						</div>
+						<Button size="icon" variant="ghost">
+							<Trash2 size={16} />
+						</Button>
+					</div>
+				{/each}
+			</div>
+			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
+				<Button on:click={() => (createTrainerDialogOpen = true)} size="icon">
+					<Plus size={16} />
+				</Button>
+				<Dialog
+					hasTrigger={false}
+					dialogTitle="Trainer hinzufügen"
+					bind:open={createTrainerDialogOpen}
+				>
+					<div slot="dialogContent">
+						<form
+							class="grid gap-4 py-4"
+							bind:this={formElement}
+							action="?/addTrainer"
+							method="post"
+							use:enhance
+						>
+							<div class="flex flex-col">
+								<div class="px-3 mb-3 flex space-x-3 items-center">
+									<Input bind:value={searchTerm} type="search" placeholder="Suche Benutzer..." />
+								</div>
+								<div class="flex flex-col space-y-2 overflow-y-auto h-36">
+									{#if filteredUsers.length != 0}
+										{#each filteredUsers as user, index (index)}
+											<!-- svelte-ignore a11y-click-events-have-key-events -->
+											<!-- svelte-ignore a11y-no-static-element-interactions -->
+											<div
+												class="py-1 flex items-center w-full cursor-pointer hover:bg-slate-100 rounded"
+											>
+												<input
+													type="checkbox"
+													class="ml-3"
+													bind:group={selectedTrainers}
+													name="box"
+													id={`box-${index}`}
+													value={user.id}
+												/>
+												<label for={`box-${index}`} class="py-1 flex-1 ml-3 cursor-pointer"
+													>{user.name}</label
+												>
+												<Badge class="mr-3" variant="outline">
+													{#if user.role == 'TRAINER'}
+														Trainer
+													{:else if user.role == 'ADMINISTRATOR'}
+														Administrator
+													{:else}
+														Benutzer
+													{/if}
+												</Badge>
+											</div>
+										{/each}
+									{:else}
+										<div class="text-center mt-3 text-xs font-medium text-gray-500">
+											Benutzer konnte nicht gefunden werden.
+										</div>
+									{/if}
+								</div>
+							</div>
+
+							<div class="flex mt-3">
+								{#if selectedTrainers.length > 0}
+									<div class="flex flex-col space-y-2" transition:slide>
+										<div class="">Ausgewählte Benutzer</div>
+										<div class="space-x-3">
+											{#each selectedTrainers as trainer}
+												<Badge variant="secondary">
+													{data.users.filter((v) => v.id == trainer)[0].name}
+												</Badge>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</div>
+						</form>
+					</div>
+					<div slot="dialogFooter">
+						<Button
+							on:click={() => {
+								formElement.submit();
+							}}
+							type="submit"
+						>
+							<Plus class="stroke-white mr-2 h-4 w-4" />
+							<p>Hinzufügen</p>
+						</Button>
+					</div>
+				</Dialog>
+			</div>
+		</div>
+		<div class="flex w-full border-t-2 pt-6">
+			<div class="w-1/3">
+				<h1 class="font-medium text-lg">Trainingszeiten</h1>
+			</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">
+				{#each data?.trainings.items as training}
+					<div class="border-2 p-6 rounded-lg">
+						<div class="flex flex-col space-y-3">
+							<div class="flex justify-between items-center">
+								<span class="font-medium text-lg">
+									{training.day}
+								</span>
+								<Button size="icon" variant="ghost">
+									<Trash2 size={16} />
+								</Button>
+							</div>
+							<div class="flex space-x-3 items-center">
+								<span class="text-xs">{training.start} - {training.end} Uhr</span>
+								<span class="w-1 h-1 bg-black rounded-full"></span>
+								<a class="text-xs" href={training.location_url}>{training.location_label}</a>
+							</div>
+						</div>
+					</div>
+				{/each}
+			</div>
+			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
+				<Button size="icon">
+					<Plus size={16} />
+				</Button>
+				<Button variant="outline" size="icon">
+					<Pencil size={16} />
+				</Button>
+			</div>
+		</div>
 	</div>
 	<div class="flex space-x-12 !mb-8">
 		<div class="w-1/4 flex flex-col space-y-6 border-2 p-6 rounded-lg">
@@ -275,6 +460,13 @@
 							</Button>
 						</div>
 					</Dialog>
+					<!-- <UserDialog
+						handler={() => {
+							formElement.submit();
+						}}
+						bind:open={createTrainerDialogOpen}
+						users={data.users}
+					/> -->
 				</div>
 				<Table.Root>
 					<Table.Header>
