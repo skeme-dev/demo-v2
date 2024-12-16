@@ -3,7 +3,7 @@
 	import type { PageData } from './$types';
 	import * as Table from '$lib/components/dashboard/ui/table';
 	import Badge from '$lib/components/dashboard/ui/badge/badge.svelte';
-	import { Clock, Pencil, Plus, Trash2 } from 'lucide-svelte';
+	import { Clock, Pencil, PencilOff, Plus, Trash2 } from 'lucide-svelte';
 	import * as AlertDialog from '$lib/components/dashboard/ui/alert-dialog';
 	import Dialog from '$lib/components/dashboard/components/Dialog.svelte';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
@@ -16,9 +16,10 @@
 	import EventDialog from '$lib/components/dashboard/components/teams/EventDialog.svelte';
 	import Scheduler from '$lib/components/dashboard/components/teams/Scheduler.svelte';
 	import { monthNames, weekdays } from '$lib/utils/calendar';
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import UserDialog from '$lib/components/dashboard/components/UserDialog.svelte';
+	import { page } from '$app/stores';
 
 	export let data: PageData;
 
@@ -70,6 +71,16 @@
 		return d1 - d2;
 	}
 
+	const dayMap = {
+		Montag: 1,
+		Dienstag: 2,
+		Mittwoch: 4,
+		Donnerstag: 5,
+		Freitag: 6,
+		Samstag: 7,
+		Sonntag: 8
+	};
+
 	const m = new Map<string, any[]>();
 
 	function getEventMap(events: any[]) {
@@ -97,14 +108,6 @@
 		getEventMap(data.events.items);
 	}
 
-	// Object.keys(obj).forEach((el) => {
-	// 	console.log(el);
-	// });
-
-	// Object.entries(obj).forEach((el) => {
-	// 	console.log(el);
-	// });
-
 	async function deleteEvent(eventId: string) {
 		const req = await fetch('/dashboard/events/', {
 			method: 'DELETE',
@@ -114,7 +117,6 @@
 		const data = await req.json();
 
 		if (data.code == 200) {
-			console.log('testttt');
 			await invalidateAll();
 		} else if (data.code == 400) {
 			toast.error('Beim Löschen ist ein Fehler aufgetreten.');
@@ -123,9 +125,119 @@
 		}
 	}
 
+	async function deleteTrainer(id: string) {
+		const form = new FormData();
+
+		form.append('trainerId', id);
+
+		const response = await fetch('/dashboard/teams/' + $page.params.teamId + '?/deleteTrainer', {
+			method: 'POST',
+			body: form
+		});
+
+		response.json().then(async (v) => {
+			if (v.type == 'success') {
+				toast.success('Änderungen wurden erfolgreich gespeichert');
+				await invalidateAll();
+			} else {
+				toast.error('Änderungen konnten nicht gespeichert werden');
+			}
+		});
+	}
+
+	async function deleteTrainingSchedule(id: string) {
+		const form = new FormData();
+
+		form.append('trainingScheduleId', id);
+
+		const response = await fetch(
+			'/dashboard/teams/' + $page.params.teamId + '?/deleteTrainingSchedule',
+			{
+				method: 'POST',
+				body: form
+			}
+		);
+
+		response.json().then(async (v) => {
+			if (v.type == 'success') {
+				toast.success('Änderungen wurden erfolgreich gespeichert');
+				await invalidateAll();
+			} else {
+				toast.error('Änderungen konnten nicht gespeichert werden');
+			}
+		});
+	}
+
+	async function deleteTeam() {
+		const form = new FormData();
+		form.append('teamId', $page.params.teamId);
+
+		const response = await fetch('/dashboard/teams?/deleteTeam', {
+			method: 'POST',
+			body: form
+		});
+
+		response.json().then((v) => {
+			if (v.type == 'success') {
+				goto('/dashboard/departments/');
+			} else {
+				toast.error('Änderungen konnten nicht gespeichert werden');
+			}
+		});
+	}
+
+	async function updateTeam(
+		id: string = $page.params.teamId,
+		title?: string | null,
+		description?: string | null,
+		teamImage: File | null
+	) {
+		let updateObject: any = {};
+
+		// check if values were changed
+		if (title && title != data.team.title) {
+			console.log('label has changed');
+			updateObject['title'] = title;
+		}
+
+		if (description && description != data.team.description) {
+			console.log('description has changed');
+			updateObject['description'] = description;
+		}
+
+		// check if any values have changed
+		if (Object.keys(updateObject).length == 0) return; // no values changed
+
+		const request = await fetch('/dashboard/departments/' + id, {
+			method: 'POST',
+			body: JSON.stringify(updateObject)
+		});
+
+		const json = await request.json();
+
+		if (json.code == 200) {
+			console.log('REQUEST: ', json.message);
+			teamNameEdit = false;
+			teamDescriptionEdit = false;
+			await invalidateAll();
+		} else {
+			console.error('Anfrage konntet nicht verarbeitet werden');
+			toast.error('Anfrage konnte nicht verarbeitet werden');
+		}
+	}
+
 	let eventToDelete: string = '';
-	let deleteEventDialogOpen: boolean = false;
 	let createTrainerDialogOpen: boolean = false;
+	let createTrainingScheduleOpen: boolean = false;
+
+	let deleteTeamDialogOpen: boolean = false;
+	let deleteEventDialogOpen: boolean = false;
+
+	let currentTeamName: string = data.team.title;
+	let currentTeamDescription: string = data.team.description;
+
+	let teamNameEdit: boolean = false;
+	let teamDescriptionEdit: boolean = false;
 </script>
 
 <AlertDialog.Root bind:open={deleteEventDialogOpen}>
@@ -152,20 +264,77 @@
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
-<div class="flex flex-col w-full space-y-6">
-	<div class="flex flex-col space-y-3 mb-8">
-		<h1 class="text-3xl font-semibold">Teams</h1>
-		<h3 class="font-medium text-gray-500">Verwalte dein Team</h3>
+<AlertDialog.Root bind:open={deleteTeamDialogOpen}>
+	<AlertDialog.Trigger />
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>Team löschen</AlertDialog.Title>
+			<AlertDialog.Description>
+				Das Löschen dieses Teams kann nicht mehr rückgängig gemacht werden.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel>Abbrechen</AlertDialog.Cancel>
+			<AlertDialog.Action asChild let:builder>
+				<Button
+					on:click={() => {
+						deleteTeam();
+					}}
+					builders={[builder]}
+					variant="destructive">Löschen</Button
+				>
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<div class="flex flex-col w-full space-y-6 mb-6 h-fit">
+	<div class="flex justify-between items-center">
+		<div class="flex flex-col space-y-3 mb-8">
+			<h1 class="text-3xl font-semibold">Teams</h1>
+			<h3 class="font-medium text-gray-500">Verwalte dein Team</h3>
+		</div>
+		<div class="">
+			<Button
+				variant="destructive"
+				size="icon"
+				on:click={() => {
+					deleteTeamDialogOpen = true;
+				}}
+			>
+				<Trash2 size={16} />
+			</Button>
+		</div>
 	</div>
 	<div class="space-y-12">
 		<div class="flex w-full border-t-2 pt-6">
 			<div class="w-1/3">
 				<h1 class="font-medium text-lg">Mannschaftsname</h1>
 			</div>
-			<div class="w-3/5 grid grid-cols-2 gap-6">test</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">
+				{#if teamNameEdit}
+					<div class="flex space-x-3" in:slide>
+						<Input bind:value={currentTeamName} type="text" />
+						<!-- <Textarea bind:value={currentDescription} /> -->
+						<Button
+							on:click={() => {
+								// updateDepartment(data.department.id, null, currentDescription, selectedUser);
+							}}>Speichern</Button
+						>
+					</div>
+				{:else}
+					<p class="flex items-center p-2" in:slide>
+						{data.team.title}
+					</p>
+				{/if}
+			</div>
 			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
-				<Button variant="outline" size="icon">
-					<Pencil size={16} />
+				<Button on:click={() => (teamNameEdit = !teamNameEdit)} variant="outline" size="icon">
+					{#if !teamNameEdit}
+						<Pencil size={16} />
+					{:else}
+						<PencilOff size={16} />
+					{/if}
 				</Button>
 			</div>
 		</div>
@@ -173,10 +342,34 @@
 			<div class="w-1/3">
 				<h1 class="font-medium text-lg">Beschreibung</h1>
 			</div>
-			<div class="w-3/5 grid grid-cols-2 gap-6">test</div>
+			<div class="w-3/5 grid grid-cols-2 gap-6">
+				{#if teamDescriptionEdit}
+					<div class="flex space-x-3" in:slide>
+						<Input bind:value={currentTeamDescription} type="text" />
+						<!-- <Textarea bind:value={currentDescription} /> -->
+						<Button
+							on:click={() => {
+								// updateDepartment(data.department.id, null, currentDescription, selectedUser);
+							}}>Speichern</Button
+						>
+					</div>
+				{:else}
+					<p class="flex items-center p-2" in:slide>
+						{data.team.description}
+					</p>
+				{/if}
+			</div>
 			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
-				<Button variant="outline" size="icon">
-					<Pencil size={16} />
+				<Button
+					on:click={() => (teamDescriptionEdit = !teamDescriptionEdit)}
+					variant="outline"
+					size="icon"
+				>
+					{#if !teamDescriptionEdit}
+						<Pencil size={16} />
+					{:else}
+						<PencilOff size={16} />
+					{/if}
 				</Button>
 			</div>
 		</div>
@@ -196,27 +389,31 @@
 				<h1 class="font-medium text-lg">Trainer</h1>
 			</div>
 			<div class="w-3/5 grid grid-cols-2 gap-6">
-				{#each data?.team?.expand.trainers as trainer}
-					<div class="flex justify-between items-center border-2 p-3 rounded-lg">
-						<div class="flex flex-col space-y-3">
-							<Badge class="w-fit" variant="outline">
-								{#if trainer.role == 'TRAINER'}
-									Trainer
-								{:else if trainer.role == 'ADMINISTRATOR'}
-									Administrator
-								{:else}
-									Benutzer
-								{/if}
-							</Badge>
-							<span class="text-lg font-medium">
-								{trainer.name}
-							</span>
+				{#if data?.team?.expand.trainers}
+					{#each data?.team?.expand.trainers as trainer}
+						<div class="flex justify-between items-center border-2 p-3 rounded-lg">
+							<div class="flex flex-col space-y-3">
+								<Badge class="w-fit" variant="outline">
+									{#if trainer.role == 'TRAINER'}
+										Trainer
+									{:else if trainer.role == 'ADMINISTRATOR'}
+										Administrator
+									{:else}
+										Benutzer
+									{/if}
+								</Badge>
+								<span class="text-lg font-medium">
+									{trainer.name}
+								</span>
+							</div>
+							<Button on:click={() => deleteTrainer(trainer.id)} size="icon" variant="ghost">
+								<Trash2 size={16} />
+							</Button>
 						</div>
-						<Button size="icon" variant="ghost">
-							<Trash2 size={16} />
-						</Button>
-					</div>
-				{/each}
+					{/each}
+				{:else}
+					<p class="text-sm font-medium text-gray-600">Keine Trainer vorhanden.</p>
+				{/if}
 			</div>
 			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
 				<Button on:click={() => (createTrainerDialogOpen = true)} size="icon">
@@ -312,435 +509,242 @@
 				<h1 class="font-medium text-lg">Trainingszeiten</h1>
 			</div>
 			<div class="w-3/5 grid grid-cols-2 gap-6">
-				{#each data?.trainings.items as training}
-					<div class="border-2 p-6 rounded-lg">
-						<div class="flex flex-col space-y-3">
-							<div class="flex justify-between items-center">
-								<span class="font-medium text-lg">
-									{training.day}
-								</span>
-								<Button size="icon" variant="ghost">
-									<Trash2 size={16} />
-								</Button>
-							</div>
-							<div class="flex space-x-3 items-center">
-								<span class="text-xs">{training.start} - {training.end} Uhr</span>
-								<span class="w-1 h-1 bg-black rounded-full"></span>
-								<a class="text-xs" href={training.location_url}>{training.location_label}</a>
+				{#if data.trainings.items.length > 0}
+					{#each data?.trainings.items.sort((a, b) => {
+						return dayMap[a.day] - dayMap[b.day];
+					}) as training}
+						<div class="border-2 p-6 rounded-lg">
+							<div class="flex flex-col space-y-3">
+								<div class="flex justify-between items-center">
+									<span class="font-medium text-lg">
+										{training.day}
+									</span>
+									<Button
+										on:click={() => {
+											deleteTrainingSchedule(training.id);
+										}}
+										size="icon"
+										variant="ghost"
+									>
+										<Trash2 size={16} />
+									</Button>
+								</div>
+								<div class="flex space-x-3 items-center">
+									<span class="text-xs">{training.start} - {training.end} Uhr</span>
+									<span class="w-1 h-1 bg-black rounded-full"></span>
+									<a class="text-xs" href={training.location_url}>{training.location_label}</a>
+								</div>
 							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				{:else}
+					<p class="text-sm font-medium text-gray-600">Keine Trainingszeiten vorhanden.</p>
+				{/if}
 			</div>
 			<div class="w-1/12 flex flex-col space-y-3 justify-start items-end">
-				<Button size="icon">
+				<Button on:click={() => (createTrainingScheduleOpen = true)} size="icon">
 					<Plus size={16} />
 				</Button>
-				<Button variant="outline" size="icon">
+
+				<Dialog
+					hasTrigger={false}
+					dialogTitle="Trainingszeit hinzufügen"
+					dialogDescription="Erstelle eine Trainingszeit für deine Mannschaft."
+					bind:open={createTrainingScheduleOpen}
+				>
+					<div slot="dialogContent">
+						<form
+							class="grid gap-4 py-4"
+							bind:this={formElement}
+							action="?/createTrainingSchedule"
+							method="post"
+							use:enhance={() => {
+								return ({ update }) => {
+									createTrainingScheduleOpen = false;
+									update({ invalidateAll: true });
+								};
+							}}
+						>
+							<div class="grid grid-cols-4 items-center gap-4">
+								<Label for="day" class="text-right">Trainingstag</Label>
+								<Select.Root portal={null}>
+									<Select.Trigger class="col-span-3">
+										<Select.Value placeholder="Wähle einen Trainingstag aus" />
+									</Select.Trigger>
+									<Select.Content>
+										<Select.Group>
+											<Select.Label>Wochentag</Select.Label>
+											{#each weekdays as weekday}
+												<Select.Item value={weekday} label={weekday}>{weekday}</Select.Item>
+											{/each}
+										</Select.Group>
+									</Select.Content>
+									<Select.Input name="day" id="day" />
+								</Select.Root>
+							</div>
+							<div class="grid grid-cols-4 items-center gap-4">
+								<Label for="description" class="text-right">Zeitraum</Label>
+
+								<div class="col-span-3 flex space-x-3 items-center">
+									<Input type="time" name="time_start" value="18:00" class="w-fit" />
+									<p class="">bis</p>
+									<Input type="time" name="time_end" id="description" class="w-fit" value="19:00" />
+								</div>
+							</div>
+							<div class="grid grid-cols-4 items-center gap-4">
+								<Label for="name" class="text-right">Trainingsort</Label>
+								<Input
+									name="location"
+									placeholder="z.B. Alianz Arena..."
+									class="col-span-3"
+									value="Alianz Arena"
+								/>
+							</div>
+							<div class="grid grid-cols-4 items-center gap-4">
+								<Label for="location_url" class="text-right">Link zum Ort</Label>
+								<Input
+									type="url"
+									name="location_url"
+									id="location_url"
+									placeholder="z.B. Google Maps Link"
+									class="col-span-3"
+									value="https://localhost:5173/contact"
+								/>
+							</div>
+						</form>
+					</div>
+					<div slot="dialogFooter">
+						<Button
+							on:click={() => {
+								formElement.submit();
+							}}
+							type="submit"
+						>
+							<Plus class="stroke-white mr-2 h-4 w-4" />
+							<p>Hinzufügen</p>
+						</Button>
+					</div>
+				</Dialog>
+				<Button disabled={!data.team.expand.training_schedule} variant="outline" size="icon">
 					<Pencil size={16} />
 				</Button>
 			</div>
 		</div>
 	</div>
-	<div class="flex space-x-12 !mb-8">
-		<div class="w-1/4 flex flex-col space-y-6 border-2 p-6 rounded-lg">
-			<div class="flex justify-between items-center">
-				<h1 class="text-lg font-semibold">{data.team.title}</h1>
-				<Button variant="outline" size="icon">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="w-4 h-4"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-						/>
-					</svg>
-				</Button>
-				<!-- <h2 class="text-sm">Generelle Information über das Team</h2> -->
-			</div>
-			<div class="flex flex-col space-y-3">
-				<h2 class="text-sm font-medium">Teambild</h2>
-				<div class="flex flex-col space-y-4">
-					<img class="w-full rounded-lg" src={data.team.team_image} alt="" />
-				</div>
-			</div>
-			<div class="flex flex-col space-y-3 !mt-8">
-				<h2 class="text-sm font-medium">Beschreibung</h2>
-				<div class="flex flex-col space-y-4">
-					<p class="text-sm text-justify">
-						{data.team.description}
-					</p>
-				</div>
-			</div>
-		</div>
-		<div class="flex flex-1 flex-col w-3/4 space-y-6">
-			<div class="border-2 p-6 rounded-lg space-y-6">
-				<div class="flex justify-between items-center">
-					<h1 class="font-medium">Trainer</h1>
-					<Dialog dialogTitle="Trainer hinzufügen" triggerClassName="p-2.5" triggerVariant="ghost">
-						<Button slot="dialogTrigger" variant="ghost">
-							<Plus class="stroke-black mr-2 h-4 w-4" />
-							Trainer hinzufügen
-						</Button>
-						<div slot="dialogContent">
-							<form
-								class="grid gap-4 py-4"
-								bind:this={formElement}
-								action="?/addTrainer"
-								method="post"
-								use:enhance
-							>
-								<div class="flex flex-col">
-									<div class="px-3 mb-3 flex space-x-3 items-center">
-										<Input bind:value={searchTerm} type="search" placeholder="Suche Benutzer..." />
-									</div>
-									<div class="flex flex-col space-y-2 overflow-y-auto h-36">
-										{#each filteredUsers as user, index (index)}
-											<!-- svelte-ignore a11y-click-events-have-key-events -->
-											<!-- svelte-ignore a11y-no-static-element-interactions -->
-											<div
-												class="py-1 flex items-center w-full cursor-pointer hover:bg-slate-100 rounded"
-											>
-												<input
-													type="checkbox"
-													class="ml-3"
-													bind:group={selectedTrainers}
-													name="box"
-													id={`box-${index}`}
-													value={user.id}
-												/>
-												<label for={`box-${index}`} class="py-1 flex-1 ml-3 cursor-pointer"
-													>{user.name}</label
-												>
-												<Badge class="mr-3" variant="outline">
-													{#if user.role == 'TRAINER'}
-														Trainer
-													{:else if user.role == 'ADMINISTRATOR'}
-														Administrator
-													{:else}
-														Benutzer
-													{/if}
-												</Badge>
-											</div>
-										{/each}
-									</div>
-								</div>
 
-								<div class="flex mt-3">
-									{#if selectedTrainers.length > 0}
-										<div class="flex flex-col space-y-2" transition:slide>
-											<div class="">Ausgewählte Benutzer</div>
-											<div class="space-x-3">
-												{#each selectedTrainers as trainer}
-													<Badge variant="secondary">
-														{data.users.filter((v) => v.id == trainer)[0].name}
-													</Badge>
-												{/each}
-											</div>
-										</div>
-									{/if}
-								</div>
-							</form>
-						</div>
-						<div slot="dialogFooter">
-							<Button
-								on:click={() => {
-									formElement.submit();
-								}}
-								type="submit"
-							>
-								<Plus class="stroke-white mr-2 h-4 w-4" />
-								<p>Hinzufügen</p>
-							</Button>
-						</div>
-					</Dialog>
-					<!-- <UserDialog
-						handler={() => {
-							formElement.submit();
-						}}
-						bind:open={createTrainerDialogOpen}
-						users={data.users}
-					/> -->
-				</div>
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head>Name</Table.Head>
-							<Table.Head>E-Mail</Table.Head>
-							<Table.Head>Rolle</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#if data?.team.expand}
-							{#each data?.team?.expand.trainers as trainer}
-								<Table.Row>
-									<Table.Cell>{trainer.name}</Table.Cell>
-									<Table.Cell>
-										<a href={'mailto:' + trainer.email}>{trainer.email}</a>
-									</Table.Cell>
-									<Table.Cell>
-										<Badge variant="secondary">
-											{roles.get(trainer.role)}
-										</Badge>
-									</Table.Cell>
-								</Table.Row>
-							{/each}
-						{:else}
-							Keine Trainer vorhanden
-						{/if}
-					</Table.Body>
-				</Table.Root>
-			</div>
+<!--	<div class="flex flex-col">-->
+<!--		<div class="flex justify-between items-center">-->
+<!--			<div class="flex flex-col space-y-3">-->
+<!--				<h1 class="text-lg font-medium">Events</h1>-->
+<!--			</div>-->
+<!--			&lt;!&ndash; <Button-->
+<!--				on:click={() => {-->
+<!--					eventDialogOpen = true;-->
+<!--				}}-->
+<!--			>-->
+<!--				<Plus class="stroke-white mr-2 h-4 w-4" />-->
+<!--				Event hinzufügen-->
+<!--			</Button>-->
+<!--			<EventDialog bind:dialogOpen={eventDialogOpen} />-->
+<!--		 &ndash;&gt;-->
+<!--		</div>-->
+<!--		<Separator class="mt-3" />-->
 
-			<div class="border-2 p-6 rounded-lg space-y-6">
-				<div class="flex justify-between items-center">
-					<h1 class="font-medium">Trainingszeiten</h1>
+<!--		<Scheduler eventMap={m} />-->
+<!--		<h2 class="mt-8 mb-3 font-medium">Alle Events</h2>-->
+<!--		<div class="flex flex-col space-y-3">-->
+<!--			&lt;!&ndash; {#each data.events.items as event}-->
+<!--				<div class="flex space-x-6 rounded-md p-6 border-2">-->
+<!--					<div class="w-[5%] flex items-center justify-center">-->
+<!--						<CalendarClock />-->
+<!--					</div>-->
+<!--					<div class="w-[95%]">-->
+<!--						<div class="grid grid-cols-5">-->
+<!--							<div class="flex items-center col-span-2">-->
+<!--								<h1 class="text-lg font-medium">{event.title}</h1>-->
+<!--							</div>-->
+<!--							<div class="flex justify-center items-center col-span-2">-->
+<!--								<div class="flex space-x-6">-->
+<!--									<div class="flex flex-col space-y-1">-->
+<!--										<p class="text-sm font-medium">Von</p>-->
+<!--										<Badge variant="secondary">-->
+<!--											{formatter.format(new Date(event.event_start))} Uhr-->
+<!--										</Badge>-->
+<!--									</div>-->
+<!--									<div class="flex flex-col space-y-1">-->
+<!--										<p class="text-sm font-medium">Bis</p>-->
+<!--										<Badge variant="secondary">-->
+<!--											{formatter.format(new Date(event.event_end))} Uhr-->
+<!--										</Badge>-->
+<!--									</div>-->
+<!--								</div>-->
+<!--							</div>-->
+<!--							<div class="flex justify-end items-center">-->
+<!--								<Button variant="ghost" size="icon">-->
+<!--									<Pen class="h-4 w-4" />-->
+<!--								</Button>-->
+<!--								<Button variant="ghost" size="icon">-->
+<!--									<ChevronDown class="h-4 w-4" />-->
+<!--								</Button>-->
+<!--							</div>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			{/each} &ndash;&gt;-->
+<!--			{#each [...m] as [key, value]}-->
+<!--				<div class="flex space-x-3">-->
+<!--					<div class="flex w-[15%] h-full bg-gray-100 p-6 rounded-lg">-->
+<!--						<div class="flex flex-col space-y-2">-->
+<!--							<span class="text-xl font-medium">-->
+<!--								{format2(key).dateString}-->
+<!--							</span>-->
+<!--							<span class="text-gray-500 text-sm font-medium">{format2(key).weekday}</span>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--					<div class="flex flex-1 flex-col" class:space-y-3={value.length > 1}>-->
+<!--						{#each value as val}-->
+<!--							<div-->
+<!--								class:h-full={value.length == 1}-->
+<!--								class="flex items-center col-span-6 border-2 rounded-lg py-6 pr-6 pl-4"-->
+<!--							>-->
+<!--								<div class="w-1 h-full bg-[#eb5a23] rounded-full mr-3"></div>-->
+<!--								<div class="flex flex-col space-y-1">-->
+<!--									<h1 class="text-lg font-semibold">{val.title}</h1>-->
+<!--									<div class="flex space-x-6">-->
+<!--										<p class="text-sm">-->
+<!--											{val.description}-->
+<!--										</p>-->
+<!--										<div class="flex items-center space-x-2">-->
+<!--											<Clock class="w-4 h-4" />-->
+<!--											<div class="text-sm">-->
+<!--												{formatter.format(new Date(val.event_start))} - {formatter.format(-->
+<!--													new Date(val.event_end)-->
+<!--												)} Uhr-->
+<!--											</div>-->
+<!--										</div>-->
+<!--									</div>-->
+<!--								</div>-->
 
-					<Dialog
-						dialogTitle="Trainingszeit hinzufügen"
-						triggerClassName="p-2.5"
-						triggerVariant="ghost"
-					>
-						<Button slot="dialogTrigger" variant="ghost">
-							<Plus class="stroke-black mr-2 h-4 w-4" />
-							Trainingszeit hinzufügen
-						</Button>
-						<div slot="dialogContent">
-							<form
-								class="grid gap-4 py-4"
-								bind:this={formElement}
-								action="?/createTrainingSchedule"
-								method="post"
-								use:enhance
-							>
-								<div class="grid grid-cols-4 items-center gap-4">
-									<Label for="day" class="text-right">Trainingstag</Label>
-									<Select.Root portal={null}>
-										<Select.Trigger class="col-span-3">
-											<Select.Value placeholder="Wähle einen Trainingstag aus" />
-										</Select.Trigger>
-										<Select.Content>
-											<Select.Group>
-												<Select.Label>Wochentag</Select.Label>
-												{#each weekdays as weekday}
-													<Select.Item value={weekday} label={weekday}>{weekday}</Select.Item>
-												{/each}
-											</Select.Group>
-										</Select.Content>
-										<Select.Input name="day" id="day" />
-									</Select.Root>
-								</div>
-								<div class="grid grid-cols-4 items-center gap-4">
-									<Label for="description" class="text-right">Zeitraum</Label>
-
-									<div class="col-span-3 flex space-x-3 items-center">
-										<Input type="time" name="time_start" value="18:00" class="w-fit" />
-										<p class="">bis</p>
-										<Input
-											type="time"
-											name="time_end"
-											id="description"
-											class="w-fit"
-											value="19:00"
-										/>
-									</div>
-								</div>
-								<div class="grid grid-cols-4 items-center gap-4">
-									<Label for="name" class="text-right">Trainingsort</Label>
-									<Input
-										name="location"
-										placeholder="z.B. Alianz Arena..."
-										class="col-span-3"
-										value="Alianz Arena"
-									/>
-								</div>
-								<div class="grid grid-cols-4 items-center gap-4">
-									<Label for="location_url" class="text-right">Link zum Ort</Label>
-									<Input
-										type="url"
-										name="location_url"
-										id="location_url"
-										placeholder="z.B. Google Maps Link"
-										class="col-span-3"
-										value="https://localhost:5173/contact"
-									/>
-								</div>
-							</form>
-						</div>
-						<div slot="dialogFooter">
-							<Button
-								on:click={() => {
-									formElement.submit();
-								}}
-								type="submit"
-							>
-								<Plus class="stroke-white mr-2 h-4 w-4" />
-								<p>Hinzufügen</p>
-							</Button>
-						</div>
-					</Dialog>
-				</div>
-				<Table.Root>
-					<Table.Header>
-						<Table.Row>
-							<Table.Head>Trainingstag</Table.Head>
-							<Table.Head>Trainingsort</Table.Head>
-							<Table.Head>Trainingszeit</Table.Head>
-							<Table.Head>Aktion</Table.Head>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each data?.trainings.items as training}
-							<Table.Row>
-								<Table.Cell>{training.day}</Table.Cell>
-								<Table.Cell>
-									<a href={training.location_url}>{training.location_label}</a>
-								</Table.Cell>
-								<Table.Cell>{training.start} - {training.end} Uhr</Table.Cell>
-								<Table.Cell
-									><Button variant="ghost" size="icon">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke-width="1.5"
-											stroke="currentColor"
-											class="w-4 h-4"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-											/>
-										</svg>
-									</Button></Table.Cell
-								>
-							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
-			</div>
-		</div>
-	</div>
-	<div class="flex flex-col">
-		<div class="flex justify-between items-center">
-			<div class="flex flex-col space-y-3">
-				<h1 class="text-lg font-medium">Events</h1>
-			</div>
-			<!-- <Button
-				on:click={() => {
-					eventDialogOpen = true;
-				}}
-			>
-				<Plus class="stroke-white mr-2 h-4 w-4" />
-				Event hinzufügen
-			</Button>
-			<EventDialog bind:dialogOpen={eventDialogOpen} />
-		 -->
-		</div>
-		<Separator class="mt-3" />
-
-		<Scheduler eventMap={m} />
-		<h2 class="mt-8 mb-3 font-medium">Alle Events</h2>
-		<div class="flex flex-col space-y-3">
-			<!-- {#each data.events.items as event}
-				<div class="flex space-x-6 rounded-md p-6 border-2">
-					<div class="w-[5%] flex items-center justify-center">
-						<CalendarClock />
-					</div>
-					<div class="w-[95%]">
-						<div class="grid grid-cols-5">
-							<div class="flex items-center col-span-2">
-								<h1 class="text-lg font-medium">{event.title}</h1>
-							</div>
-							<div class="flex justify-center items-center col-span-2">
-								<div class="flex space-x-6">
-									<div class="flex flex-col space-y-1">
-										<p class="text-sm font-medium">Von</p>
-										<Badge variant="secondary">
-											{formatter.format(new Date(event.event_start))} Uhr
-										</Badge>
-									</div>
-									<div class="flex flex-col space-y-1">
-										<p class="text-sm font-medium">Bis</p>
-										<Badge variant="secondary">
-											{formatter.format(new Date(event.event_end))} Uhr
-										</Badge>
-									</div>
-								</div>
-							</div>
-							<div class="flex justify-end items-center">
-								<Button variant="ghost" size="icon">
-									<Pen class="h-4 w-4" />
-								</Button>
-								<Button variant="ghost" size="icon">
-									<ChevronDown class="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-					</div>
-				</div>
-			{/each} -->
-			{#each [...m] as [key, value]}
-				<div class="flex space-x-3">
-					<div class="flex w-[15%] h-full bg-gray-100 p-6 rounded-lg">
-						<div class="flex flex-col space-y-2">
-							<span class="text-xl font-medium">
-								{format2(key).dateString}
-							</span>
-							<span class="text-gray-500 text-sm font-medium">{format2(key).weekday}</span>
-						</div>
-					</div>
-					<div class="flex flex-1 flex-col" class:space-y-3={value.length > 1}>
-						{#each value as val}
-							<div
-								class:h-full={value.length == 1}
-								class="flex items-center col-span-6 border-2 rounded-lg py-6 pr-6 pl-4"
-							>
-								<div class="w-1 h-full bg-[#eb5a23] rounded-full mr-3"></div>
-								<div class="flex flex-col space-y-1">
-									<h1 class="text-lg font-semibold">{val.title}</h1>
-									<div class="flex space-x-6">
-										<p class="text-sm">
-											{val.description}
-										</p>
-										<div class="flex items-center space-x-2">
-											<Clock class="w-4 h-4" />
-											<div class="text-sm">
-												{formatter.format(new Date(val.event_start))} - {formatter.format(
-													new Date(val.event_end)
-												)} Uhr
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div class="ml-auto flex space-x-3">
-									<Button size="icon" variant="outline">
-										<Pencil class="w-4 h-4" />
-									</Button>
-									<Button
-										on:click={() => {
-											eventToDelete = val.id;
-											deleteEventDialogOpen = true;
-										}}
-										size="icon"
-										variant="outline"
-									>
-										<Trash2 class="w-4 h-4" />
-									</Button>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-			{/each}
-		</div>
-	</div>
+<!--								<div class="ml-auto flex space-x-3">-->
+<!--									<Button size="icon" variant="outline">-->
+<!--										<Pencil class="w-4 h-4" />-->
+<!--									</Button>-->
+<!--									<Button-->
+<!--										on:click={() => {-->
+<!--											eventToDelete = val.id;-->
+<!--											deleteEventDialogOpen = true;-->
+<!--										}}-->
+<!--										size="icon"-->
+<!--										variant="outline"-->
+<!--									>-->
+<!--										<Trash2 class="w-4 h-4" />-->
+<!--									</Button>-->
+<!--								</div>-->
+<!--							</div>-->
+<!--						{/each}-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			{/each}-->
+<!--		</div>-->
+<!--	</div>-->
 </div>

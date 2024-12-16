@@ -1,9 +1,17 @@
 <script lang="ts">
 	import Badge from '../ui/badge/badge.svelte';
+	import * as DropdownMenu from "../ui/dropdown-menu"
+	import * as Avatar from "../ui/avatar";
+	import { Button } from "../ui/button";
 	import { roles } from '../roles';
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '../ui/breadcrumb/index';
 	import { House } from 'lucide-svelte';
+	import { getContext } from 'svelte';
+
+	const user = getContext('user');
+
+	let logoutForm;
 
 	// get relevant parts of pathname (everything after /dashboard)
 	let pathnameArray = $page.url.pathname.split('/');
@@ -43,6 +51,14 @@
 
 		return breadcrumbArray;
 	}
+
+	function getInitials(str: string) {
+		let res = str.split(" ");
+		return (res[0][0] + res[1][0]).toUpperCase();
+
+	}
+
+
 
 	const breadcrumbArray = getBreadcrumbArray(pathnameArray);
 </script>
@@ -97,7 +113,6 @@
 				/>
 			</svg>
 		</button>
-		<form method="post" action="/dashboard/login?/logout">
 			<button
 				type="submit"
 				class="border bg-white flex justify-center items-center rounded-full w-10 h-10"
@@ -113,7 +128,37 @@
 					/></svg
 				>
 			</button>
-		</form>
-		<div class="flex justify-center items-center rounded-full w-10 h-10 bg-red-300">LS</div>
+
+		<div>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger asChild let:builder>
+					<Button variant="ghost" builders={[builder]} class="relative h-10 w-10 rounded-full">
+						<Avatar.Root class="h-10 w-10">
+<!--							<Avatar.Image src="/avatars/01.png" alt="@shadcn" />-->
+							<Avatar.Fallback>{getInitials(user.name)}</Avatar.Fallback>
+						</Avatar.Root>
+					</Button>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content class="w-56" align="end">
+					<DropdownMenu.Label class="font-normal">
+						<div class="flex flex-col space-y-1">
+							<p class="text-sm font-medium leading-none">{user.name}</p>
+							<p class="text-muted-foreground text-xs leading-none">{user.email}</p>
+						</div>
+					</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Group>
+						<DropdownMenu.Item>
+							Einstellungen
+						</DropdownMenu.Item>
+					</DropdownMenu.Group>
+					<form bind:this={logoutForm} method="post" action="/dashboard/login?/logout">
+						<DropdownMenu.Item on:click={() => logoutForm.submit()}>
+							Abmelden
+						</DropdownMenu.Item>
+					</form>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</div>
 	</div>
 </header>

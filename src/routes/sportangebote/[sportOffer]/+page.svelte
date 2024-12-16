@@ -1,7 +1,8 @@
-<script>
-	import { goto } from '$app/navigation';
+<script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { getImageUrl } from '$lib';
+
+	import { departmentRoutes } from '$lib/stores/routeStore.js';
 
 	const sportOffer = $page.params.sportOffer;
 
@@ -70,7 +71,7 @@
 
 	const pageContentToSpeech = () => {
 		let utterance = new SpeechSynthesisUtterance();
-		utterance.text = 'Volleyball';
+		utterance.text = sportOffer;
 		utterance.lang = 'de';
 		window.speechSynthesis.speak(utterance);
 	};
@@ -108,40 +109,47 @@
 		</div>
 		<div class="flex flex-col space-y-6">
 			<h2 class="text-2xl font-semibold">Unsere Mannschaften</h2>
-			<div class="flex md:flex-row flex-col md:space-x-12 md:space-y-0 space-y-12">
-				{#each sportOffersObject.teams as team}
-					<div class="bg-[#161a4e] text-white rounded">
-						<div class="max-w-1/2 h-fit">
-							<img class="rounded-t" src={team.teamImageUrl} alt="" />
+			{#if data.record.expand.teams}
+				<div class="flex md:flex-row flex-col md:space-x-12 md:space-y-0 space-y-12">
+					{#each data.record.expand.teams as team}
+						<div class="bg-[#161a4e] text-white rounded">
+							<div class="max-w-1/2 h-max">
+								<img class="rounded-t h-[200px]" src={getImageUrl(team.id, team.team_image)} alt="" />
+							</div>
+							<div class="p-6 flex justify-center items-center">
+								<a
+									href={$page.url.pathname + '/' + encodeURIComponent(team.title.toLowerCase())}
+									class="text-center font-medium text-xl"
+								>
+									{team.title}
+								</a>
+							</div>
 						</div>
-						<div class="p-6 flex justify-center items-center">
-							<a href={team.url} class="text-center font-medium text-xl">
-								{team.name}
-							</a>
-						</div>
-					</div>
-				{/each}
-			</div>
+					{/each}
+				</div>
+				{/if}
 		</div>
 		<div class="flex flex-col space-y-6">
+				{#if data?.record.expand.relatedPosts}
 			<h2 class="text-2xl font-semibold">Aktuelles</h2>
 			<div class="grid grids-cols-3-1-3 gap-6 divide-y">
-				{#each blogPostsPreviews as preview}
+				{#each data.record.expand.relatedPosts as post}
 					<div class="flex flex-col my-1 bg-[#eee]">
 						<div class="w-full">
-							<img src={preview.image} alt="" />
+							<img src={post?.image} alt="" />
 						</div>
 						<div class="flex flex-col p-6">
 							<div class="flex pt-1 space-x-3 items-center">
-								<span>{preview.category}</span>
+								<span>{data.record.label}</span>
 								<span>|</span>
-								<span>Hochgeladen am {preview.uploadedAt.toLocaleDateString()}</span>
+								<span>Hochgeladen am {post.created}</span>
 							</div>
-							<a href={preview.url} class="mt-1 text-xl">{preview.title}</a>
+							<a href={"/posts/" + post.slug} class="mt-1 text-xl">{post.title}</a>
 						</div>
 					</div>
 				{/each}
 			</div>
+				{/if}
 		</div>
 	</div>
 </div>

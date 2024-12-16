@@ -10,9 +10,13 @@
 		let outputArray: string[] = [];
 		arr.forEach((arrElement) => {
 			const capitalizedLetter = arrElement.charAt(0).toUpperCase();
+
 			if (arrElement.includes('ss')) {
 				arrElement.replace('ss', 'ß');
 			}
+
+			arrElement = decodeURIComponent(arrElement);
+
 			let arr2 = arrElement.split('');
 			arr2.shift();
 			arr2.unshift(capitalizedLetter);

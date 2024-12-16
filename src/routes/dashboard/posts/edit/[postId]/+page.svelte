@@ -1,14 +1,22 @@
 <script lang="ts">
 	import Button from '$lib/components/dashboard/ui/button/button.svelte';
-	import { Plus, Trash2, CloudUpload, Save } from 'lucide-svelte';
+	import { Plus, Trash2, CloudUpload, Save, Pencil } from 'lucide-svelte';
 	import Editor3 from '$lib/components/dashboard/components/editor/Editor3.svelte';
+	import * as Sheet from '$lib/components/dashboard/ui/sheet';
 	import Label from '$lib/components/dashboard/ui/label/label.svelte';
 	import Switch from '$lib/components/dashboard/ui/switch/switch.svelte';
 	import { slide } from 'svelte/transition';
 	import ImageUploadDialog from '$lib/components/dashboard/components/ImageUploadDialog.svelte';
 	import { toast } from 'svelte-sonner';
-	import type { PageData } from './$types';
 	import { page } from '$app/stores';
+
+	import type { PageData } from './$types';
+	import Input from '$lib/components/dashboard/ui/input/input.svelte';
+	import { enhance } from '$app/forms';
+	import * as Select from '$lib/components/dashboard/ui/select';
+	import DatePicker from '$lib/components/dashboard/components/DatePicker.svelte';
+	import TestImageUpload from '$lib/components/dashboard/components/TestImageUpload.svelte';
+	import UpdateSheet from './UpdateSheet.svelte';
 
 	let attachImages: boolean = true;
 	let imageUploadDialogOpen: boolean = false;
@@ -34,8 +42,6 @@
 	async function saveChanges() {
 		const content: any = getContent();
 
-		console.log(content);
-
 		let form = new FormData();
 		form.append('content', content);
 		form.append('postId', $page.params.postId);
@@ -54,11 +60,29 @@
 		});
 	}
 
+	async function updatePostInformation(formData: Event) {
+		console.log(formData);
+
+		// check if any fields have changed
+
+	}
+
 	let getContent;
 
+	let editSheetOpen: boolean = false;
+	let publishNow: boolean = false;
+	let canEdit: boolean = false;
+
 	export let data: PageData;
-	console.log(data.post.content);
+
+	let croppedImage = null;
+
+	function handleImageCropped(image) {
+		croppedImage = image;
+	}
 </script>
+
+<UpdateSheet initialData={data} bind:open={editSheetOpen} />
 
 <div class="w-full h-full flex flex-col">
 	<div class="flex justify-between items-center mb-6">
@@ -67,14 +91,25 @@
 			<h3 class="font-medium text-gray-500">Bearbeite deinen Bericht.</h3>
 		</div>
 
-		<Button
-			on:click={() => {
-				saveChanges();
-			}}
-		>
-			<Save class="stroke-white mr-2 h-4 w-4" />
-			Änderungen speichern
-		</Button>
+		<div class="flex space-x-3">
+			<Button
+				variant="outline"
+				on:click={() => {
+					editSheetOpen = true;
+				}}
+			>
+				<Pencil class="mr-2 h-4 w-4" />
+				Bearbeiten
+			</Button>
+			<Button
+				on:click={() => {
+					saveChanges();
+				}}
+			>
+				<Save class="stroke-white mr-2 h-4 w-4" />
+				Änderungen speichern
+			</Button>
+		</div>
 	</div>
 	<!-- Editor -->
 	<div class="mb-1">

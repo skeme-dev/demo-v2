@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, buttonVariants } from '$lib/components/dashboard/ui/button/index.js';
+	import { buttonVariants } from '$lib/components/dashboard/ui/button/index.js';
 	import * as Dialog from '$lib/components/dashboard/ui/dialog/index';
 
 	export let triggerClassName: string = '';

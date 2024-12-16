@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
+	import { page } from '$app/stores';
+	import Label from './dashboard/ui/label/label.svelte';
+	import { toast } from 'svelte-sonner';
+	import { onMount } from 'svelte';
+	import { departmentRoutes } from '$lib/stores/routeStore';
 
-	const routes = [
+	let routes = [
 		{
 			label: 'Unser Verein',
 			route: '/',
@@ -90,11 +95,11 @@
 		isHamburgerMenuOpen = !isHamburgerMenuOpen;
 	}
 
-	function maybe(node, options) {
-		if (isHamburgerMenuOpen) {
-			return options.fn(node, options);
-		}
-	}
+	// function maybe(node, options) {
+	// 	if (isHamburgerMenuOpen) {
+	// 		return options.fn(node, options);
+	// 	}
+	// }
 
 	let shrinked = false;
 
@@ -108,6 +113,32 @@
 			shrinked = false;
 		}
 	}
+
+	function getURLFromLabel(label: string): string {
+		let newLabel: string = label;
+
+		return encodeURIComponent(newLabel.toLowerCase());
+	}
+
+	function getDepartmentRoutes(routes: any[], list: any[]) {
+		let departmentRoutes: any[] = [];
+
+		list.forEach((v) => {
+			departmentRoutes.push({
+				label: v.label,
+				route: '/sportangebote/' + v.label.toLowerCase()
+			});
+		});
+
+		routes[1].subroutes = departmentRoutes;
+	}
+
+	onMount(() => {
+		departmentRoutes.subscribe(() => {
+			getDepartmentRoutes(routes, $page.data.departments.items);
+			return () => {};
+		});
+	});
 </script>
 
 <nav bind:clientHeight={navbarElementHeight} class="sticky top-0 left-0 z-20">
@@ -166,7 +197,7 @@
 									}
 								}}
 								id="dropdown"
-								class="pt-10 w-[10vw] absolute top-0 left-0"
+								class="pt-10 w-min absolute top-0 left-0"
 							>
 								<div
 									transition:fade={{ duration: 100 }}

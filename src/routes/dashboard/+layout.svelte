@@ -25,7 +25,7 @@
 		<SideNavigation />
 		<main class="flex flex-1 flex-col">
 			<TopNavigation />
-			<div class="border rounded-tl-3xl flex w-full flex-1 bg-white p-12">
+			<div class="overflow-y-scroll border rounded-tl-3xl flex w-full flex-1 bg-white p-12">
 				<slot />
 			</div>
 		</main>

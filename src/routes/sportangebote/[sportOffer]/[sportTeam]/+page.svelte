@@ -2,94 +2,72 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
 	import PersonCard from '$lib/components/PersonCard.svelte';
+	import { getImageUrl } from '$lib';
 
 	const sportTeam = $page.params.sportTeam;
 
 	export let data: PageData;
 
-	const team = {
-		name: '1. Männermannschaft',
-		description:
-			'Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque quibusdam officia quae? Dolore, quas sequi?',
-		persons: [
-			{
-				name: 'Hans Schmidt',
-				position: 'Trainer',
-				email: 'hans.schmidt@sv-koweg.de',
-				imageUrl: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-				phone: '+4912345678910'
-			},
-			{
-				name: 'Hanna Schmidt',
-				position: 'Trainer',
-				email: 'hanna.schmidt@sv-koweg.de',
-				imageUrl: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250',
-				phone: '+4912345678910'
-			}
-		],
-		location: {
-			imageUrl: 'https://picsum.photos/350/200?random=3',
-			name: 'Stadion 1',
-			address: 'Hauptstraße 1, 02826 Görlitz'
-		}
-	};
+	function f(date: string) {
+		const d = new Date(date);
 
-	const blogPostsPreviews = [
-		{
-			category: 'Volleyball',
-			uploadedAt: new Date('2023-09-07'),
-			title: 'Test Blog Post 1',
-			image: 'https://picsum.photos/350/200?random=3',
-			url: '/news/volleyball/test-blog-post-1',
-			description:
-				'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ducimus quibusdam officia error distinctio, sed quam dolores reprehenderit pariatur velit consectetur.'
-		},
-		{
-			category: 'Volleyball',
-			uploadedAt: new Date('2023-09-08'),
-			title: 'Test Blog Post 2',
-			image: 'https://picsum.photos/350/200?random=4',
-			url: '/news/volleyball/test-blog-post-2',
-			description:
-				'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ducimus quibusdam officia error distinctio, sed quam dolores reprehenderit pariatur velit consectetur.'
-		},
-		{
-			category: 'Volleyball',
-			uploadedAt: new Date('2023-09-09'),
-			title: 'Test Blog Post 3',
-			image: 'https://picsum.photos/350/200?random=5',
-			url: '/news/volleyball/test-blog-post-3',
-			description:
-				'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ducimus quibusdam officia error distinctio, sed quam dolores reprehenderit pariatur velit consectetur.'
-		}
-	];
+		return d.toLocaleDateString('de-DE', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+		})
+	}
+
+	function sortWeekdays(array) {
+		const germanWeekdaysOrder = [
+			"Montag",
+			"Dienstag",
+			"Mittwoch",
+			"Donnerstag",
+			"Freitag",
+			"Samstag",
+			"Sonntag"
+		];
+
+		// Sort the input array of objects based on the correct order of the weekday property
+		return array.sort((a, b) => {
+			const indexA = germanWeekdaysOrder.indexOf(a.day);
+			const indexB = germanWeekdaysOrder.indexOf(b.day);
+			return indexA - indexB;
+		});
+	}
+
 </script>
 
-<div class="flex flex-col space-y-16">
+<div class="flex flex-col space-y-12">
 	<div class="flex flex-col space-y-6">
-		<h1 class="text-4xl font-bold">{team.name}</h1>
-		<p class="text-lg">{team.description}</p>
+		<h1 class="text-4xl font-bold">{data.team.title}</h1>
+		<p class="text-lg">{data.team.description}</p>
 	</div>
 	<div class="flex flex-col space-y-6">
 		<h2 class="text-2xl font-semibold">Ansprechpartner</h2>
-		<div class="flex md:flex-row flex-col md:space-x-12 md:space-y-0 space-y-12">
-			{#each team.persons as person}
+		<div class="flex md:w-full md:flex-row flex-col md:space-x-12 md:space-y-0 space-y-12">
+			{#each data.team.expand.trainers as person}
 				<PersonCard data={person} />
 			{/each}
 		</div>
 	</div>
-	<div class="flex flex-col space-y-6 md:!mb-12">
+	<div class="flex flex-col space-y-6">
 		<h2 class="text-2xl font-semibold">Trainingszeiten</h2>
-		<div class="flex flex-col md:space-y-0 space-y-6">
-			<div class="relative flex bg-[#eee] p-6 md:w-1/2">
-				<div class="flex flex-1 flex-col space-y-3">
-					<h1 class="text-2xl font-semibold">Montag</h1>
-					<span class="text-lg">16:00 - 17:00 Uhr</span>
-					<a
-						href="https://maps.app.goo.gl/Ntgug5EaiXxHShVH8"
-						class="w-fit group transition duration-300 text-lg font-semibold"
-						>Allianz Arena
-						<!-- <svg
+		<div class="grid gap-6 grid-cols-2">
+
+
+		{#each sortWeekdays(data.team.expand.training_schedule) as schedule}
+			<div class="flex flex-col md:space-y-0 w-full">
+				<div class="relative flex bg-[#eee] p-6 md:w-full">
+					<div class="flex flex-1 flex-col space-y-3">
+						<h1 class="text-2xl font-semibold">{schedule.day}</h1>
+						<span class="text-lg">{schedule.start} - {schedule.end} Uhr</span>
+						<a
+							href={schedule.location_url}
+							class="w-fit group transition duration-300 text-lg font-semibold"
+							>{schedule.location_label}
+							<!-- <svg
 								width="18"
 								height="18"
 								viewBox="0 0 18 18"
@@ -101,73 +79,73 @@
 									fill="#000"
 								/>
 							</svg> -->
-						<span
-							class="w-full block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-black"
-						/>
-					</a>
-				</div>
-				<div class="">
-					<svg
-						class=""
-						width="28"
-						height="28"
-						viewBox="0 0 24 24"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<g clip-path="url(#clip0_945_1108)">
-							<circle cx="12" cy="12" r="11" stroke="black" stroke-width="2" />
-							<path
-								d="M12.0112 7L12 12.6361"
-								stroke="black"
-								stroke-width="2"
-								stroke-linecap="round"
+							<span
+								class="w-full block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-black"
 							/>
-							<path d="M15 16L12 13" stroke="black" stroke-width="2" stroke-linecap="round" />
-							<rect x="11" y="9" width="1" height="4" fill="black" />
-						</g>
-						<defs>
-							<clipPath id="clip0_945_1108">
-								<rect width="24" height="24" fill="white" />
-							</clipPath>
-						</defs>
-					</svg>
+						</a>
+					</div>
+					<div class="">
+						<svg
+							class=""
+							width="28"
+							height="28"
+							viewBox="0 0 24 24"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<g clip-path="url(#clip0_945_1108)">
+								<circle cx="12" cy="12" r="11" stroke="black" stroke-width="2" />
+								<path
+									d="M12.0112 7L12 12.6361"
+									stroke="black"
+									stroke-width="2"
+									stroke-linecap="round"
+								/>
+								<path d="M15 16L12 13" stroke="black" stroke-width="2" stroke-linecap="round" />
+								<rect x="11" y="9" width="1" height="4" fill="black" />
+							</g>
+							<defs>
+								<clipPath id="clip0_945_1108">
+									<rect width="24" height="24" fill="white" />
+								</clipPath>
+							</defs>
+						</svg>
+					</div>
 				</div>
 			</div>
+		{/each}
 		</div>
-	</div>
-	<div class="w-full flex flex-col space-y-6 md:!mb-12">
+		</div>
+	<div class="w-full flex flex-col space-y-6">
 		<h2 class="text-2xl font-semibold">Die Mannschaft</h2>
-		<img
-			class="w-full"
-			src="https://www.sgplatjenwerbe.de/_cache/images/cms/Veranstaltungen/.eea67c2ad402cb506bbdc8e4ee68c166/U15.jpg"
-			alt=""
-		/>
+		<img class="w-full" src={getImageUrl(data.team.id, data.team.team_image)} alt="" />
 	</div>
-	<div class="flex flex-col space-y-6">
-		<h2 class="text-2xl font-semibold">Mannschaftsberichte</h2>
-		<div class="flex flex-col md:space-y-0 space-y-6 md:grid grids-cols-3-1-3 md:gap-6 md:divide-y">
-			{#each blogPostsPreviews as preview}
-				<div class="flex flex-col my-1 bg-[#eee]">
-					<div class="w-full">
-						<img class="w-full" src={preview.image} alt="" />
-					</div>
-					<div class="flex flex-col p-6">
-						<div class="flex pt-1 space-x-3 items-center">
-							<span>{preview.category}</span>
-							<span>|</span>
-							<span>Hochgeladen am {preview.uploadedAt.toLocaleDateString()}</span>
+	<div class="">
+	{#if data.team.relatedPosts.length > 0}
+		<div class="flex flex-col space-y-6">
+			<h2 class="text-2xl font-semibold">Mannschaftsberichte</h2>
+			<div class="flex flex-col md:space-y-0 space-y-6 md:grid grids-cols-3-1-3 md:gap-6 md:divide-y">
+				{#each data.team.expand.relatedPosts as post}
+					<div class="w-full flex flex-col my-1 bg-[#eee]">
+						<div class="w-full">
+							<img class="w-full" src={post.image} alt="" />
 						</div>
-						<a href={preview.url} class="mt-1 text-xl">{preview.title}</a>
+						<div class="flex flex-col p-6">
+							<div class="flex pt-1 space-x-3 items-center">
+								<span>Hochgeladen am {f(post.updated)}</span>
+							</div>
+							<a href={"/posts/" + post.slug} class="mt-1 text-xl font-medium">{post.title}</a>
+						</div>
 					</div>
-				</div>
-			{/each}
+				{/each}
+			</div>
 		</div>
+	{/if}
 	</div>
 </div>
 
 <style>
 	.grids-cols-3-1-3 {
-		grid-template-columns: repeat(3, minmax(0, 33.333333%));
+		grid-template-columns: repeat(2, minmax(0, 50%));
 	}
 </style>

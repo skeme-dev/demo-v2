@@ -43,8 +43,5 @@ export const actions = {
 	},
 	updateTeam: async ({ request, locals }) => {
 		const formData = await request.formData();
-	},
-	deleteTeam: async ({ request, locals }) => {
-		const formData = await request.formData();
 	}
 };

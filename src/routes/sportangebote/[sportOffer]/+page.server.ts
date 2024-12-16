@@ -1,3 +1,4 @@
+import { teamStore } from '$lib/stores/routeStore.js';
 import { fail, redirect } from '@sveltejs/kit';
 
 function capitalizeFirstLetter(str: string) {
@@ -6,14 +7,18 @@ function capitalizeFirstLetter(str: string) {
 
 // export const prerender = true;
 export const load = async ({ params, locals }) => {
-	const label = params.sportOffer.toLocaleLowerCase() as string;
-	console.log(capitalizeFirstLetter(label));
+	const label = decodeURIComponent(params.sportOffer.toLocaleLowerCase()) as string;
 	const filterString = `label='${capitalizeFirstLetter(label)}'`;
 	try {
-		const record = await locals.pb
-			.collection('departments')
-			.getFirstListItem(filterString, { expand: 'leader,teams' });
+		const record = await locals.pb.collection('departments').getFirstListItem(filterString, {
+			expand: 'leader,teams,relatedPosts',
+			fields:
+				'label,description,expand.relatedPosts.title,expand.relatedPosts.isPublished,expand.relatedPosts.created,expand.relatedPosts.publishDate,expand.relatedPosts.slug,expand.leader.name,expand.leader.email,expand.leader.phoneNumber,expand.leader.role,expand.teams.id,expand.teams.title,expand.teams.team_image'
+		});
 
+		console.log("test",record);
+
+		teamStore.set(record.items);
 		return { record };
 	} catch (error) {
 		console.log(error);

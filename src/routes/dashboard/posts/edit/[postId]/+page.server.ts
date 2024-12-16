@@ -21,5 +21,20 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 };
 export const actions: Actions = {
 	default: async () => {},
-	createPost: async () => {}
+	createPost: async () => {},
+	updatePostInformation: async ({ request, locals, params }) => {
+		const req = await request.formData();
+
+		const id = params.postId;
+		const title = req.get("title") as string;
+		const publishDate = req.get("publishDate");
+
+		console.log(title, publishDate);
+
+		try {
+			await locals.pb.collection("posts").update("")
+		} catch (error) {
+			console.error(error);
+		}
+	}
 };

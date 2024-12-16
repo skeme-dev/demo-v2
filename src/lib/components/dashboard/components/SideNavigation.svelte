@@ -11,28 +11,77 @@
 	import { getContext } from 'svelte';
 	const user = getContext('user');
 
-	let routes: DashboardRoute[] = [
-		{
-			label: 'Dashboard',
-			route: '/',
+	let routes: DashboardRoute[] = assembleRoutesBasedOnRole(user.role);
+
+	function assembleRoutesBasedOnRole(role: "TRAINER" | "DEPARTMENT_LEADER" | "ADMIN") {
+		let baseRoute: DashboardRoute[] = [{
+			label: "Dashboard",
+			route: "/",
 			iconSvg: House
-		},
-		{
-			label: 'Benutzer',
-			route: '/users',
-			iconSvg: Users
-		},
-		{
-			label: 'Berichte',
-			route: '/posts',
+		}, {
+			label: "Berichte",
+			route: "/posts",
 			iconSvg: Newspaper
-		},
-		{
-			label: 'Abteilung',
-			route: '/departments',
-			iconSvg: Building
+		}]
+
+		if (role === "TRAINER") {
+			return [...baseRoute,
+				{
+				label: "Team",
+					route: "/teams",
+					iconSvg: House
+				}
+
+			]
+		} else if (role === "DEPARTMENT_LEADER") {
+			return[
+				{
+					label: 'Dashboard',
+					route: '/',
+					iconSvg: House
+				},
+				{
+					label: 'Benutzer',
+					route: '/users',
+					iconSvg: Users
+				},
+				{
+					label: 'Berichte',
+					route: '/posts',
+					iconSvg: Newspaper
+				},
+				{
+					label: 'Abteilung',
+					route: '/departments',
+					iconSvg: Building
+				}
+			];
+		} else {
+			return[
+				{
+					label: 'Dashboard',
+					route: '/',
+					iconSvg: House
+				},
+				{
+					label: 'Benutzer',
+					route: '/users',
+					iconSvg: Users
+				},
+				{
+					label: 'Berichte',
+					route: '/posts',
+					iconSvg: Newspaper
+				},
+				{
+					label: 'Abteilungen',
+					route: '/departments',
+					iconSvg: Building
+				}
+			];
 		}
-	];
+
+	}
 </script>
 
 <aside class="px-12 w-1/5 flex flex-col justify-between">

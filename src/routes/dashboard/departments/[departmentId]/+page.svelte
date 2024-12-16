@@ -24,8 +24,6 @@
 	import { cn } from '$lib/components/dashboard/utils';
 	import { page } from '$app/stores';
 	import { toast } from 'svelte-sonner';
-	import { Description } from 'formsnap';
-	import Textarea from '$lib/components/dashboard/ui/textarea/textarea.svelte';
 
 	export let data: PageData;
 
@@ -79,7 +77,7 @@
 			await invalidateAll();
 		} else {
 			console.error('Anfrage konntet nicht verarbeitet werden');
-			toast.error('Anfrage konntet nicht verarbeitet werden');
+			toast.error('Anfrage konnte nicht verarbeitet werden');
 		}
 	}
 
@@ -102,7 +100,9 @@
 	<div class="mb-12 flex justify-between items-center">
 		<div class="flex flex-col space-y-3 mb-12">
 			<h1 class="text-3xl font-semibold">{data.department.label}</h1>
-			<h3 class="font-medium text-gray-500">Verwalte die Seite der Volleyball-Abteilung</h3>
+			<h3 class="font-medium text-gray-500">
+				Verwalte die Seite der {data.department.label}-Abteilung
+			</h3>
 		</div>
 		<div class="">
 			<Button
@@ -292,7 +292,7 @@
 			<div class="w-1/3">
 				<h1 class="font-medium text-lg">Mannschaften</h1>
 			</div>
-			{#if !data?.department.expand.teams}
+			{#if !data.department.expand.teams}
 				<div class="w-3/5">Keine Mannschaften vorhanden.</div>
 			{:else}
 				<div class="w-3/5 grid grid-cols-2 gap-6">
@@ -338,16 +338,11 @@
 						>
 							<div class="grid grid-cols-4 items-center gap-4">
 								<Label for="name" class="text-right">Name</Label>
-								<Input name="title" id="name" value="Pedro Duarte" class="col-span-3" />
+								<Input name="name" id="name" class="col-span-3" />
 							</div>
 							<div class="grid grid-cols-4 items-center gap-4">
 								<Label for="description" class="text-right">Beschreibung</Label>
-								<Input
-									name="description"
-									id="description"
-									value="Pedro Duarte"
-									class="col-span-3"
-								/>
+								<Input name="description" id="description" class="col-span-3" />
 							</div>
 							<div class="grid grid-cols-4 items-center gap-4">
 								<Label for="username" class="text-right">Trainer</Label>
