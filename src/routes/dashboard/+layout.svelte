@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
 	import { page } from '$app/stores';
 	import SideNavigation from '$lib/components/dashboard/components/SideNavigation.svelte';
 	import TopNavigation from '$lib/components/dashboard/components/TopNavigation.svelte';
@@ -39,4 +39,4 @@
 		font-family: 'Poppins', sans-serif !important;
 		background-color: #fcfcfd;
 	}
-</style>
+</style> -->

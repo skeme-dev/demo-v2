@@ -114,42 +114,46 @@
 					{#each data.record.expand.teams as team}
 						<div class="bg-[#161a4e] text-white rounded">
 							<div class="max-w-1/2 h-max">
-								<img class="rounded-t h-[200px]" src={getImageUrl(team.id, team.team_image)} alt="" />
+								<img
+									class="rounded-t h-[200px]"
+									src={getImageUrl(team.id, team.team_image)}
+									alt=""
+								/>
 							</div>
 							<div class="p-6 flex justify-center items-center">
 								<a
-									href={$page.url.pathname + '/' + encodeURIComponent(team.title.toLowerCase())}
+									href={$page.url.pathname + '/' + encodeURIComponent(team.name.toLowerCase())}
 									class="text-center font-medium text-xl"
 								>
-									{team.title}
+									{team.name}
 								</a>
 							</div>
 						</div>
 					{/each}
 				</div>
-				{/if}
+			{/if}
 		</div>
 		<div class="flex flex-col space-y-6">
-				{#if data?.record.expand.relatedPosts}
-			<h2 class="text-2xl font-semibold">Aktuelles</h2>
-			<div class="grid grids-cols-3-1-3 gap-6 divide-y">
-				{#each data.record.expand.relatedPosts as post}
-					<div class="flex flex-col my-1 bg-[#eee]">
-						<div class="w-full">
-							<img src={post?.image} alt="" />
-						</div>
-						<div class="flex flex-col p-6">
-							<div class="flex pt-1 space-x-3 items-center">
-								<span>{data.record.label}</span>
-								<span>|</span>
-								<span>Hochgeladen am {post.created}</span>
+			{#if data?.record.expand.relatedPosts}
+				<h2 class="text-2xl font-semibold">Aktuelles</h2>
+				<div class="grid grids-cols-3-1-3 gap-6 divide-y">
+					{#each data.record.expand.relatedPosts as post}
+						<div class="flex flex-col my-1 bg-[#eee]">
+							<div class="w-full">
+								<img src={post?.image} alt="" />
 							</div>
-							<a href={"/posts/" + post.slug} class="mt-1 text-xl">{post.title}</a>
+							<div class="flex flex-col p-6">
+								<div class="flex pt-1 space-x-3 items-center">
+									<span>{data.record.label}</span>
+									<span>|</span>
+									<span>Hochgeladen am {post.created}</span>
+								</div>
+								<a href={'/posts/' + post.slug} class="mt-1 text-xl">{post.title}</a>
+							</div>
 						</div>
-					</div>
-				{/each}
-			</div>
-				{/if}
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </div>

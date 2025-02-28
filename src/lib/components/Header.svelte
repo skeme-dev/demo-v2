@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { fade, slide } from 'svelte/transition';
 	import { page } from '$app/stores';
+
 	import Label from './dashboard/ui/label/label.svelte';
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { departmentRoutes } from '$lib/stores/routeStore';
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 	let routes = [
 		{
@@ -74,7 +76,7 @@
 				},
 				{
 					label: 'Dashboard',
-					route: '/dashboard'
+					route: PUBLIC_BACKEND_URL
 				}
 			]
 		},
