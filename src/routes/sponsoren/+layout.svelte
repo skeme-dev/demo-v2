@@ -5,6 +5,6 @@
 	export let data: LayoutData;
 </script>
 
-<BaseLayout>
+<BaseLayout showQuickActions={false}>
 	<slot />
 </BaseLayout>

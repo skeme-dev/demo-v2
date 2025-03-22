@@ -2,11 +2,14 @@
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
+	import Quicklinks from '$lib/components/Quicklinks.svelte';
 	import SiteMap from '$lib/components/SiteMap.svelte';
 
 	export let isBreadcrumbActive: boolean = true;
 	export let isSitemapActive: boolean = true;
 	export let isEventsActive: boolean = true;
+
+	export let showQuickActions: boolean = true;
 
 	export let sitemapOptions = {
 		label: 'Weitere Seiten',
@@ -161,6 +164,10 @@
 		};
 	});
 </script>
+
+{#if showQuickActions}
+	<Quicklinks />
+{/if}
 
 <Header />
 <div class="w-full h-[40vh] bg-img" />

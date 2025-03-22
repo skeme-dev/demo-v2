@@ -26,10 +26,10 @@
 					label: 'Vorstand',
 					route: '/verein/vorstand'
 				},
-				{
-					label: 'Vereinsstruktur',
-					route: '/verein/struktur'
-				},
+				// {
+				// 	label: 'Vereinsstruktur',
+				// 	route: '/verein/struktur'
+				// },
 				{
 					label: 'Sportstätten',
 					route: '/verein/sportstaetten'
@@ -73,6 +73,10 @@
 				{
 					label: 'Downloads',
 					route: '/service/downloads'
+				},
+				{
+					label: 'Mitglied werden',
+					route: '/join'
 				},
 				{
 					label: 'Dashboard',
