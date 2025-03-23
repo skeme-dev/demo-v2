@@ -37,13 +37,34 @@
 		</p>
 	</div>
 
-	<div class="grid w-full grid-cols-2 md:grid-cols-4 gap-6">
-		{#each sponsors as sponsor}
-			<div class="flex justify-center items-center p-3 hover:bg-[#eee] transition-all duration-200">
-				<a href={sponsor.link} class="">
-					<img src={sponsor.imageUrl} alt={sponsor.name} />
-				</a>
-			</div>
-		{/each}
+	<div class="flex flex-col space-y-6 !mt-12">
+		<h1 class="text-4xl font-bold mx-auto">Hauptsponsoren</h1>
+		<span class="w-16 h-2 bg-[#eee] mx-auto"></span>
+		<div class="grid w-full grid-cols-2 md:grid-cols-4 gap-6">
+			{#each sponsors as sponsor}
+				<div
+					class="flex justify-center items-center p-3 hover:bg-[#eee] transition-all duration-200"
+				>
+					<a href={sponsor.link} class="">
+						<img src={sponsor.imageUrl} alt={sponsor.name} />
+					</a>
+				</div>
+			{/each}
+		</div>
+	</div>
+	<div class="flex flex-col space-y-6 !mt-24">
+		<h1 class="text-4xl font-bold mx-auto">Sponsoren und Förderer</h1>
+		<span class="w-16 h-2 bg-[#eee] mx-auto"></span>
+		<div class="grid w-full grid-cols-2 md:grid-cols-4 gap-6">
+			{#each sponsors as sponsor}
+				<div
+					class="flex justify-center items-center p-3 hover:bg-[#eee] transition-all duration-200"
+				>
+					<a href={sponsor.link} class="">
+						<img src={sponsor.imageUrl} alt={sponsor.name} />
+					</a>
+				</div>
+			{/each}
+		</div>
 	</div>
 </div>

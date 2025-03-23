@@ -76,9 +76,19 @@
 		window.speechSynthesis.speak(utterance);
 	};
 
+	function f(date: string) {
+		const d = new Date(date);
+
+		return d.toLocaleDateString('de-DE', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		});
+	}
+
 	export let data;
 
-	console.log(data);
+	console.log(data.record.expand.relatedPosts[0]);
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -133,25 +143,27 @@
 				</div>
 			{/if}
 		</div>
-		<div class="flex flex-col space-y-6">
-			{#if data?.record.expand.relatedPosts}
-				<h2 class="text-2xl font-semibold">Aktuelles</h2>
-				<div class="grid grids-cols-3-1-3 gap-6 divide-y">
-					{#each data.record.expand.relatedPosts as post}
-						<div class="flex flex-col my-1 bg-[#eee]">
-							<div class="w-full">
-								<img src={post?.image} alt="" />
-							</div>
-							<div class="flex flex-col p-6">
-								<div class="flex pt-1 space-x-3 items-center">
-									<span>{data.record.label}</span>
-									<span>|</span>
-									<span>Hochgeladen am {post.created}</span>
+		<div class="">
+			{#if data.record.expand.relatedPosts.length > 0}
+				<div class="flex flex-col space-y-6">
+					<h2 class="text-2xl font-semibold">Aktuelles</h2>
+					<div
+						class="flex flex-col md:space-y-0 space-y-6 md:grid grids-cols-3-1-3 md:gap-6 md:divide-y"
+					>
+						{#each data.record.expand.relatedPosts as post}
+							<div class="w-full flex flex-col my-1 bg-[#eee]">
+								<div class="w-full">
+									<img class="w-full" src={post.image} alt="" />
 								</div>
-								<a href={'/posts/' + post.slug} class="mt-1 text-xl">{post.title}</a>
+								<div class="flex flex-col p-6">
+									<div class="flex pt-1 space-x-3 items-center">
+										<span>Hochgeladen am {f(post.updated)}</span>
+									</div>
+									<a href={'/posts/' + post.slug} class="mt-1 text-xl font-medium">{post.title}</a>
+								</div>
 							</div>
-						</div>
-					{/each}
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -160,6 +172,6 @@
 
 <style>
 	.grids-cols-3-1-3 {
-		grid-template-columns: repeat(3, minmax(0, 33.333333%));
+		grid-template-columns: repeat(2, minmax(0, 50%));
 	}
 </style>

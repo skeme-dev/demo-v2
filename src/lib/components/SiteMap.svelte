@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from "$app/stores"
+	import { page } from '$app/stores';
 	import { slide } from 'svelte/transition';
 	import slugify from 'slugify';
+	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 	interface Team {
 		name: string;
@@ -26,20 +27,29 @@
 
 	let toggledTeams: number[] = [];
 
-	let depsWithTeams = []
+	let depsWithTeams = [];
 
 	onMount(async () => {
-		const req = await fetch("http://localhost:8090/api/collections/departments/records?expand=teams&fields=label,expand.teams.title");
+		const req = await fetch(
+			PUBLIC_BACKEND_URL +
+				'/api/collections/departments/records?expand=teams&fields=label,expand.teams.name',
+			{
+				mode: 'no-cors'
+			}
+		);
 
-	req.json().then(v => {
-		console.log(v.items[0]);
-		depsWithTeams = [...v.items];
-	});
+		req
+			.json()
+			.then((v) => {
+				console.log(v.items[0]);
+				depsWithTeams = [...v.items];
+			})
+			.catch((err) => {
+				console.error(err);
+			});
 
 		toggledTeams = [];
 	});
-
-
 
 	const toggleTeams = (key: number) => {
 		if (toggledTeams.includes(key)) {
@@ -51,8 +61,6 @@
 			toggledTeams = toggledTeams;
 		}
 	};
-
-
 </script>
 
 <div class="flex flex-col w-full">
@@ -62,7 +70,10 @@
 			<li class="py-2">
 				<div class="flex items-center">
 					<div class="flex flex-1">
-						<a class="text-lg text-gray-500" href={"/sportangebote/" + item.label.toLocaleLowerCase()}>{item.label}</a>
+						<a
+							class="text-lg text-gray-500"
+							href={'/sportangebote/' + item.label.toLocaleLowerCase()}>{item.label}</a
+						>
 					</div>
 					{#if item.expand}
 						<button
@@ -90,8 +101,13 @@
 						<ul class="pl-3" transition:slide>
 							{#each item.expand.teams as team}
 								<li class="py-1">
-									<a class=" text-gray-500" href={'/sportangebote/' + encodeURIComponent(item.label) + "/" + encodeURIComponent(team.title.toLowerCase())}>{team.title}</a>
-
+									<a
+										class=" text-gray-500"
+										href={'/sportangebote/' +
+											encodeURIComponent(item.label) +
+											'/' +
+											encodeURIComponent(team.name.toLowerCase())}>{team.name}</a
+									>
 								</li>
 							{/each}
 						</ul>

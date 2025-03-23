@@ -4,13 +4,15 @@
 			imageUrl: 'http://kickebocca.de/assets/verein/historie/verein-historie-triathlon.jpg',
 			name: 'Maxi Mustermann',
 			position: '1. Geschäftsführer',
-			email: 'maxi.mustermann@sv-koweg.de'
+			email: 'maxi.mustermann@sv-koweg.de',
+			tel: '+49 123 452032'
 		},
 		{
 			imageUrl: 'http://kickebocca.de/assets/verein/historie/verein-historie-triathlon.jpg',
 			name: 'Max Mustermann',
 			position: 'Schatzmeister',
-			email: 'max.mustermann@sv-koweg.de'
+			email: 'max.mustermann@sv-koweg.de',
+			tel: '+49 123 452031'
 		}
 	];
 </script>
@@ -23,16 +25,25 @@
 		aliquid veritatis quos ducimus earum! Nam, porro! Ducimus voluptatum, corporis aliquam quaerat
 		rerum libero atque earum.
 	</h2> -->
-	<div class="grid grid-cols-2 gap-12">
+	<div class="grid gap-12">
 		{#each vorstand as mitglied, index}
-			<div class="flex bg-accent text-white">
-				<div class="flex flex-col w-3/4">
-					<img src={mitglied.imageUrl} width="285" height="160" alt={'Foto ' + mitglied.name} />
-					<div class="flex flex-col p-6">
-						<div class="mb-1 text-sm font-medium">{mitglied.position}</div>
-						<div class="font-bold text-2xl mb-6">{mitglied.name}</div>
+			<div class="flex w-full bg-accent text-white">
+				<div class="flex flex-col w-full">
+					<img
+						class="ml-auto"
+						src={mitglied.imageUrl}
+						width="350"
+						height="160"
+						alt={'Foto ' + mitglied.name}
+					/>
+					<div class="flex flex-col p-12">
+						<div class="mb-2">{mitglied.position}</div>
+						<div class="font-bold text-3xl mb-6">{mitglied.name}</div>
 						<div class="underline">
 							<a class="font-medium" href={'mailto:' + mitglied.email}>{mitglied.email}</a>
+						</div>
+						<div class="underline">
+							<a class="font-medium" href={'tel:' + mitglied.tel}>{mitglied.tel}</a>
 						</div>
 					</div>
 				</div>

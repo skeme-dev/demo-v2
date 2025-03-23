@@ -33,7 +33,7 @@
 
 <div class="w-full flex flex-col space-y-6">
 	<h1 class="text-4xl font-bold">Vereinshistorie</h1>
-	<h2 class="text-2xl font-semibold text-accent">
+	<h2 class="text-lg">
 		Eine Satzung muss individuell für einen Verein erarbeitet werden. Sie muss auf einen Verein mit
 		seinen Organen, seiner Organisation 'zugeschnitten' werden. Ein Verein muss sich seine Satzung
 		unter Mitwirkung seiner Gremien erarbeiten.
@@ -41,15 +41,15 @@
 	<div class="grid grid-cols-2">
 		{#each milestones as milestone, index}
 			{#if index % 2 == 0}
-				<div class="flex flex-col justify-center p-6 border-r-[6px] border-gray-200">
+				<div class="flex flex-col justify-center p-6 border-r-[6px] bg-[#eee] border-[#eee]">
 					<h1 class="ml-auto font-bold mb-3 text-2xl">{milestone.year}</h1>
 					<p class="text-right">{milestone.description}</p>
 				</div>
-				<div class="p-6">
+				<div class="bg-[#eee] p-6">
 					<img src={milestone.imageUrl} alt="" />
 				</div>
 			{:else}
-				<div class="border-r-[6px] border-gray-200 p-6">
+				<div class="border-r-[6px] border-[#eee] p-6">
 					<img src={milestone.imageUrl} alt="" />
 				</div>
 				<div class="flex flex-col justify-center px-3 pl-6 pb-6">

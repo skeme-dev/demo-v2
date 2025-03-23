@@ -13,7 +13,7 @@ export const load = async ({ params, locals }) => {
 		const record = await locals.pb.collection('departments').getFirstListItem(filterString, {
 			expand: 'leader,teams,relatedPosts',
 			fields:
-				'label,description,expand.relatedPosts.title,expand.relatedPosts.isPublished,expand.relatedPosts.created,expand.relatedPosts.publishDate,expand.relatedPosts.slug,expand.leader.name,expand.leader.email,expand.leader.phoneNumber,expand.leader.role,expand.teams.id,expand.teams.name,expand.teams.team_image'
+				'label,description,expand.relatedPosts.title,expand.relatedPosts.isPublished,expand.relatedPosts.created,expand.relatedPosts.updated,expand.relatedPosts.publishDate,expand.relatedPosts.slug,expand.leader.name,expand.leader.email,expand.leader.phoneNumber,expand.leader.role,expand.teams.id,expand.teams.name,expand.teams.team_image'
 		});
 
 		console.log('test', record);

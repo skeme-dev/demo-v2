@@ -5,6 +5,6 @@
 	export let data: LayoutData;
 </script>
 
-<BaseLayout showQuickActions={false}>
+<BaseLayout showQuickActions={false} isSitemapActive={false} isEventsActive={false}>
 	<slot />
 </BaseLayout>

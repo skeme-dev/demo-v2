@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 
 	import Label from './dashboard/ui/label/label.svelte';
-	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { departmentRoutes } from '$lib/stores/routeStore';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
@@ -18,10 +17,6 @@
 					route: '/'
 				},
 
-				{
-					label: 'Geschäftsstelle',
-					route: '/verein/geschaeftsstelle'
-				},
 				{
 					label: 'Vorstand',
 					route: '/verein/vorstand'
@@ -101,12 +96,6 @@
 		isHamburgerMenuOpen = !isHamburgerMenuOpen;
 	}
 
-	// function maybe(node, options) {
-	// 	if (isHamburgerMenuOpen) {
-	// 		return options.fn(node, options);
-	// 	}
-	// }
-
 	let shrinked = false;
 
 	function shrinkNavbar() {
@@ -149,13 +138,13 @@
 
 <nav bind:clientHeight={navbarElementHeight} class="sticky top-0 left-0 z-20">
 	<header
-		class="transition-all duration-300 md:w-full h-fit bg-white z-50 sticky flex md:px-64 px-8 {shrinked
+		class="relative transition-all duration-300 md:w-full h-fit bg-white z-50 sticky flex md:pl-16 md:pr-64 px-8 {shrinked
 			? 'py-2'
 			: 'py-6'}"
 	>
 		<a
 			href="/"
-			class="transition-all duration-300 {shrinked ? 'md:w-20 w-14' : 'md:w-24 w-16'} h-fit"
+			class="transition-all duration-300 {shrinked ? 'md:min-w-20 w-14' : 'md:min-w-24 w-16'} h-fit"
 		>
 			<img src="/sv-koweg-logo.png" alt="SV Koweg Logo" />
 		</a>

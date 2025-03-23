@@ -84,9 +84,7 @@
 		</div>
 		<!-- News Area -->
 	</div>
-	<div
-		class="md:w-screen flex md:flex-col flex-col md:space-x-24 md:px-64 px-8 py-12 bg-[#eee] mt-12"
-	>
+	<div class="md:w-screen flex md:flex-col flex-col md:px-64 px-8 py-12 bg-[#eee] mt-12">
 		<div class="h-full">
 			<h1 class="font-bold md:text-4xl text-3xl mb-12">Aktuelles</h1>
 		</div>
@@ -120,11 +118,11 @@
 				{/if}
 			</div> -->
 
-			<div class="md:hidden flex flex-col w-auto divide-solid space-y-8">
+			<div class="grid grid-cols-3 gap-6 w-auto">
 				{#each placeholderBlogPosts as blogPost}
-					<div class="flex flex-col pt-8">
+					<div class="flex flex-col p-6 hover:bg-white transition-all duration-200">
 						<div class="flex h-fit flex-col">
-							<div class="w-full h-fit bg-green-300">
+							<div class="w-fit h-fit bg-green-300">
 								<img class="w-full h-full object-cover" src={blogPost.image} alt="" />
 							</div>
 							<div class="flex space-x-3 mt-3">
@@ -132,7 +130,7 @@
 								<p>|</p>
 								<p>{blogPost.uploadedAt}</p>
 							</div>
-							<h1 class="text-2xl font-semibold mb-3">{blogPost.title}</h1>
+							<h1 class="text-xl font-semibold mb-3 text-left">{blogPost.title}</h1>
 							<p class="text-justify">{blogPost.previewText}</p>
 							<a
 								href={blogPost.link}

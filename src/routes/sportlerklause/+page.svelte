@@ -3,15 +3,23 @@
 
 	export let data: PageData;
 
+	const mitglied = {
+		imageUrl: 'https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=920',
+		name: 'Hans Wurst',
+		position: 'Verantwortlicher der Sportlerklause',
+		email: 'hans.wurst@sv-koweg.de',
+		tel: '+49 1234 56789'
+	};
+
 	export let form;
 </script>
 
 <div class="flex flex-col space-y-6">
 	<div class="flex">
-		<div class="md:w-4/5 w-full flex-col space-y-6 md:pr-36">
+		<div class="w-full flex-col space-y-6 md:pr-36">
 			<h1 class="text-4xl font-bold">Sportlerklause</h1>
 			<div class="flex flex-col">
-				<p class="md:text-left text-justify text-lg">
+				<p class=" text-justify text-lg">
 					Wir möchten Sie gern in unserer Vereinsklause begrüßen. Neben täglichen Öffnungszeiten
 					bieten wir Ihnen die Möglichkeit, die Räumlichkeiten für private Veranstaltungen und
 					(Vereins-)Versammlungen zu mieten. Dabei steht Ihnen unser qualifiziertes Fachpersonal
@@ -21,7 +29,7 @@
 					trauen Sie sich ruhig. Wir freuen uns auf Ihren Besuch.
 				</p>
 
-				<div class="md:hidden block w-full relative">
+				<!-- <div class="md:hidden block w-full relative">
 					<div
 						class="h-fit mt-6 space-y-6 flex flex-col rounded bg-accent text-white py-6 px-8 w-full"
 					>
@@ -40,9 +48,9 @@
 							>
 						</div>
 					</div>
-				</div>
+				</div> -->
 
-				<div class="flex flex-col md:space-x-12 mt-12 p-6 bg-[#eee] md:w-fit w-full">
+				<div class="flex flex-col md:space-x-12 mt-12 p-6 bg-[#eee] w-full">
 					<div class="flex items-center md:space-x-5 mb-4">
 						<svg
 							class="md:block hidden"
@@ -141,23 +149,28 @@
 					>Absenden</button
 				>
 			</form>
-		</div>
 
-		<div class="md:block hidden w-1/5 relative">
-			<div class="h-fit mt-6 space-y-6 flex flex-col rounded bg-accent text-white py-6 px-8 w-full">
-				<h1 class="text-xl font-medium">Verantwortliche</h1>
-				<div class="w-full">
-					<img
-						src="https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=920"
-						alt="Profilbild des Verantwortlichen der Sportlerklause"
-						class="rounded"
-					/>
+			<div class="flex w-full bg-accent text-white">
+				<div class="flex w-full">
+					<div class="mr-auto md:w-[285px] w-1/3 h-full">
+						<img
+							class="w-full h-full object-cover"
+							src={mitglied.imageUrl}
+							alt={'Foto ' + mitglied.name}
+						/>
+					</div>
+					<div class="md:pl-24 pl-8 flex flex-1 justify-center items-start flex-col">
+						<div class="mb-2 md:text-base text-sm">{mitglied.position}</div>
+						<div class="font-bold md:text-3xl text-2xl md:mb-6 mb-3">{mitglied.name}</div>
+						<div class="underline md:text-base text-sm mb-2">
+							<a class="font-medium" href={'mailto:' + mitglied.email}>{mitglied.email}</a>
+						</div>
+						<div class="underline md:text-base text-sm">
+							<a class="font-medium" href={'tel:' + mitglied.tel}>{mitglied.tel}</a>
+						</div>
+					</div>
 				</div>
-				<div class="flex flex-col space-y-1">
-					<h2 class="text-2xl font-semibold">Hans Wurst</h2>
-					<span class="text-lg"><a href="tel:+49123456789">+49 1234 56789</a></span>
-					<span class="text-lg"><a href="mailto:klause@sv-koweg.de">klause@sv-koweg.de</a></span>
-				</div>
+				<!-- <div class="w-1/2"></div> -->
 			</div>
 		</div>
 	</div>
