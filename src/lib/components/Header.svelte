@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { departmentRoutes } from '$lib/stores/routeStore';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
+	import slugify from 'slugify';
 
 	let routes = [
 		{
@@ -121,7 +122,7 @@
 		list.forEach((v) => {
 			departmentRoutes.push({
 				label: v.label,
-				route: '/sportangebote/' + v.label.toLowerCase()
+				route: '/sportangebote/' + slugify(v.label, { lower: true })
 			});
 		});
 

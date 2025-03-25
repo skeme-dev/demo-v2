@@ -87,8 +87,6 @@
 	}
 
 	export let data;
-
-	console.log(data.record.expand.relatedPosts[0]);
 </script>
 
 <div class="flex flex-col space-y-3">
@@ -144,7 +142,7 @@
 			{/if}
 		</div>
 		<div class="">
-			{#if data.record.expand.relatedPosts.length > 0}
+			{#if data.record.expand.relatedPosts?.length > 0}
 				<div class="flex flex-col space-y-6">
 					<h2 class="text-2xl font-semibold">Aktuelles</h2>
 					<div
