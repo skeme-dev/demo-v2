@@ -11,8 +11,6 @@ export const load = async ({ params, locals }) => {
 	const label = decodeURIComponent(params.sportOffer.toLocaleLowerCase()) as string;
 	const filterString = `slug='${slugify(label, { lower: true })}'`;
 
-	console.log(label);
-
 	try {
 		const record = await locals.pb.collection('departments').getFirstListItem(filterString, {
 			expand: 'leader,teams,relatedPosts',
