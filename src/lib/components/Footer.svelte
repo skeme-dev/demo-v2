@@ -82,8 +82,9 @@
 			{#if browser}
 				<Carousel
 					bind:this={carousel}
-					particlesToShow={3}
+					particlesToShow={5}
 					autoplay
+					infinite
 					autoplayDuration={2000}
 					swiping={false}
 					dots={false}

@@ -7,7 +7,7 @@
 			label: 'Volleyball'
 		},
 		{
-			id: 2,
+			id: 2, 
 			label: 'Fußball'
 		}
 	];
@@ -22,7 +22,7 @@
 	<div class="flex flex-col">
 		<p class="md:text-left text-justify text-lg">
 			Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet vero blanditiis vel quidem ipsa
-			magnam esse rerum, tempore molestiae repellat, accusamus ipsam magni nulla atque nobis quam.
+			<!-- magnam esse rerum, tempore molestiae repellat, accusamus ipsam magni nulla atque nobis quam. -->
 			Ad, molestiae voluptates.
 		</p>
 	</div>

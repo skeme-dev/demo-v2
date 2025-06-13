@@ -1,23 +1,56 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+
 
 	export let data: PageData;
 
-	const downloadableFiles = [
-		{
-			downloadLink: 'https://sv-koweg.de/service/downloads/o2ifoi23ogfbvb2giob',
-			filename: 'Beispiel-Datei'
-		},
-		{
-			downloadLink: 'https://sv-koweg.de/service/downloads/o2ifoi23ogfbvb2gi213f32fob',
-			filename: 'Beispiel-Datei 2'
-		},
-		{
-			downloadLink: 'https://sv-koweg.de/service/downloads/o2ifoi23ogfbvb2gi23rfob',
-			filename: 'Beispiel-Datei 3'
-		}
-	];
+
+	// let downloadables = [];
+
+	console.log(data.files);
+
+	function buildDownloadableUrl(recordId: string, filename: string) {
+		const parts: string[] = [];
+	
+		parts.push(PUBLIC_POCKETBASE_URL);
+		parts.push("api");
+		parts.push("files");
+		parts.push("_files")
+		parts.push(recordId);
+		parts.push(filename);
+	
+		let s = parts.join("/");
+
+		// s += "?download=1"
+
+		return s;
+	}
+
+	// onMount(async () => {
+	// 	const response = await fetch(PUBLIC_POCKETBASE_URL + "/public/meta.txt");
+
+	// 	if (response.ok) {
+	// 		const data = await response.text();
+
+	// 		const filenames = data.split('\n').filter(line => line.length > 0);
+
+	// 		downloadables = filenames.map((file: string)=> {
+	// 			return {
+	// 				downloadLink: buildDownloadableUrl(file),
+	// 				filename: file
+	// 			}
+	// 		})
+	// 	} else {
+	// 		console.error("Error fetching data:", response.status, response.statusText);
+	// 	}
+	// });
 </script>
+
+<svelte:head>
+	<title>Downloads | SV Koweg Görlitz e.V.</title>
+</svelte:head>
 
 <div class="flex flex-col space-y-6">
 	<h1 class="text-4xl font-bold">Downloads</h1>
@@ -27,7 +60,8 @@
 		Mitarbeiter in der Geschäftsstelle wenden.
 	</p>
 	<div class="flex flex-col space-y-6 md:w-1/2 w-full !mt-12">
-		{#each downloadableFiles as file}
+		{#if data.files.length > 0}
+			{#each data.files as file}
 			<div class="flex items-center bg-accent text-white p-6">
 				<div class="flex">
 					<div class="mr-6 flex justify-center items-center">
@@ -64,10 +98,10 @@
 							</defs>
 						</svg>
 					</div>
-					<h1 class="text-xl font-semibold">{file.filename}</h1>
+					<h1 class="text-xl font-semibold">{file.name}</h1>
 				</div>
 				<div class="p-1 flex justify-center items-center ml-auto">
-					<a class="" href={file.downloadLink}>
+					<a class="" href={buildDownloadableUrl(file.id, file.file)} target="_blank" download>
 						<svg
 							width="28"
 							height="28"
@@ -107,6 +141,9 @@
 					</a>
 				</div>
 			</div>
-		{/each}
+			{/each}
+			{:else}
+			<p>Es sind keine Downloads verfügbar.</p>
+		{/if}
 	</div>
 </div>
